@@ -15,6 +15,7 @@ import { Route as ShelterRouteImport } from './routes/shelter'
 import { Route as LostRouteImport } from './routes/lost'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as EmergencyRouteImport } from './routes/emergency'
+import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AudioRouteImport } from './routes/audio'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -51,6 +52,11 @@ const HealthRoute = HealthRouteImport.update({
 const EmergencyRoute = EmergencyRouteImport.update({
   id: '/emergency',
   path: '/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/audio': typeof AudioRoute
   '/auth': typeof AuthRoute
+  '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
   '/lost': typeof LostRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/audio': typeof AudioRoute
   '/auth': typeof AuthRoute
+  '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
   '/lost': typeof LostRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/audio': typeof AudioRoute
   '/auth': typeof AuthRoute
+  '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
   '/lost': typeof LostRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/audio'
     | '/auth'
+    | '/demo'
     | '/emergency'
     | '/health'
     | '/lost'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/audio'
     | '/auth'
+    | '/demo'
     | '/emergency'
     | '/health'
     | '/lost'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/audio'
     | '/auth'
+    | '/demo'
     | '/emergency'
     | '/health'
     | '/lost'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   AudioRoute: typeof AudioRoute
   AuthRoute: typeof AuthRoute
+  DemoRoute: typeof DemoRoute
   EmergencyRoute: typeof EmergencyRoute
   HealthRoute: typeof HealthRoute
   LostRoute: typeof LostRoute
@@ -241,6 +254,13 @@ declare module '@tanstack/react-router' {
       path: '/emergency'
       fullPath: '/emergency'
       preLoaderRoute: typeof EmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -301,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   AudioRoute: AudioRoute,
   AuthRoute: AuthRoute,
+  DemoRoute: DemoRoute,
   EmergencyRoute: EmergencyRoute,
   HealthRoute: HealthRoute,
   LostRoute: LostRoute,
