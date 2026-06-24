@@ -22,9 +22,14 @@ function AdminPage() {
   useEffect(() => {
     if (!user) return;
     setBusy(true);
-    const table = ({ animals: "animals", lost: "lost_reports", wildlife: "wildlife_alerts", emergency: "emergency_reports", ai: "ai_analyses" })[tab];
-    supabase.from(table).select("*").order("created_at", { ascending: false }).limit(50)
-      .then(({ data }) => { setRows((data as Row[]) ?? []); setBusy(false); });
+    const q =
+      tab === "animals" ? supabase.from("animals").select("*") :
+      tab === "lost" ? supabase.from("lost_reports").select("*") :
+      tab === "wildlife" ? supabase.from("wildlife_alerts").select("*") :
+      tab === "emergency" ? supabase.from("emergency_reports").select("*") :
+      supabase.from("ai_analyses").select("*");
+    q.order("created_at", { ascending: false }).limit(50)
+      .then(({ data }) => { setRows(((data as unknown) as Row[]) ?? []); setBusy(false); });
   }, [tab, user]);
 
   if (loading) return null;
