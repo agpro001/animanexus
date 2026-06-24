@@ -18,6 +18,7 @@ import { Route as HealthRouteImport } from './routes/health'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AudioRouteImport } from './routes/audio'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
@@ -72,6 +73,11 @@ const DemoRoute = DemoRouteImport.update({
   path: '/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/analytics': typeof AnalyticsRoute
   '/audio': typeof AudioRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/faq': typeof FaqRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/analytics': typeof AnalyticsRoute
   '/audio': typeof AudioRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/faq': typeof FaqRoute
@@ -159,6 +167,7 @@ export interface FileRoutesById {
   '/analytics': typeof AnalyticsRoute
   '/audio': typeof AudioRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/faq': typeof FaqRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/audio'
     | '/auth'
+    | '/contact'
     | '/demo'
     | '/emergency'
     | '/faq'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/audio'
     | '/auth'
+    | '/contact'
     | '/demo'
     | '/emergency'
     | '/faq'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/analytics'
     | '/audio'
     | '/auth'
+    | '/contact'
     | '/demo'
     | '/emergency'
     | '/faq'
@@ -238,6 +250,7 @@ export interface RootRouteChildren {
   AnalyticsRoute: typeof AnalyticsRoute
   AudioRoute: typeof AudioRoute
   AuthRoute: typeof AuthRoute
+  ContactRoute: typeof ContactRoute
   DemoRoute: typeof DemoRoute
   EmergencyRoute: typeof EmergencyRoute
   FaqRoute: typeof FaqRoute
@@ -316,6 +329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -382,6 +402,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnalyticsRoute: AnalyticsRoute,
   AudioRoute: AudioRoute,
   AuthRoute: AuthRoute,
+  ContactRoute: ContactRoute,
   DemoRoute: DemoRoute,
   EmergencyRoute: EmergencyRoute,
   FaqRoute: FaqRoute,
