@@ -13,6 +13,7 @@ import { Route as WildlifeRouteImport } from './routes/wildlife'
 import { Route as TwinRouteImport } from './routes/twin'
 import { Route as ShelterRouteImport } from './routes/shelter'
 import { Route as LostRouteImport } from './routes/lost'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as DemoRouteImport } from './routes/demo'
@@ -43,6 +44,11 @@ const ShelterRoute = ShelterRouteImport.update({
 const LostRoute = LostRouteImport.update({
   id: '/lost',
   path: '/lost',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthRoute = HealthRouteImport.update({
@@ -111,6 +117,7 @@ export interface FileRoutesByFullPath {
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByTo {
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/health': typeof HealthRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -165,6 +174,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/emergency'
     | '/health'
+    | '/how-it-works'
     | '/lost'
     | '/shelter'
     | '/twin'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/emergency'
     | '/health'
+    | '/how-it-works'
     | '/lost'
     | '/shelter'
     | '/twin'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/emergency'
     | '/health'
+    | '/how-it-works'
     | '/lost'
     | '/shelter'
     | '/twin'
@@ -217,6 +229,7 @@ export interface RootRouteChildren {
   DemoRoute: typeof DemoRoute
   EmergencyRoute: typeof EmergencyRoute
   HealthRoute: typeof HealthRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   LostRoute: typeof LostRoute
   ShelterRoute: typeof ShelterRoute
   TwinRoute: typeof TwinRoute
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/lost'
       fullPath: '/lost'
       preLoaderRoute: typeof LostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health': {
@@ -345,6 +365,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoRoute: DemoRoute,
   EmergencyRoute: EmergencyRoute,
   HealthRoute: HealthRoute,
+  HowItWorksRoute: HowItWorksRoute,
   LostRoute: LostRoute,
   ShelterRoute: ShelterRoute,
   TwinRoute: TwinRoute,
