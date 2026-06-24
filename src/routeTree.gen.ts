@@ -9,38 +9,368 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WildlifeRouteImport } from './routes/wildlife'
+import { Route as TwinRouteImport } from './routes/twin'
+import { Route as ShelterRouteImport } from './routes/shelter'
+import { Route as LostRouteImport } from './routes/lost'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as HealthRouteImport } from './routes/health'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as EmergencyRouteImport } from './routes/emergency'
+import { Route as DemoRouteImport } from './routes/demo'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AudioRouteImport } from './routes/audio'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiAnalyzeRouteImport } from './routes/api/analyze'
 
+const WildlifeRoute = WildlifeRouteImport.update({
+  id: '/wildlife',
+  path: '/wildlife',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TwinRoute = TwinRouteImport.update({
+  id: '/twin',
+  path: '/twin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShelterRoute = ShelterRouteImport.update({
+  id: '/shelter',
+  path: '/shelter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LostRoute = LostRouteImport.update({
+  id: '/lost',
+  path: '/lost',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HealthRoute = HealthRouteImport.update({
+  id: '/health',
+  path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmergencyRoute = EmergencyRouteImport.update({
+  id: '/emergency',
+  path: '/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DemoRoute = DemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AudioRoute = AudioRouteImport.update({
+  id: '/audio',
+  path: '/audio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyzeRoute = ApiAnalyzeRouteImport.update({
+  id: '/api/analyze',
+  path: '/api/analyze',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/analytics': typeof AnalyticsRoute
+  '/audio': typeof AudioRoute
+  '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/demo': typeof DemoRoute
+  '/emergency': typeof EmergencyRoute
+  '/faq': typeof FaqRoute
+  '/health': typeof HealthRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/lost': typeof LostRoute
+  '/shelter': typeof ShelterRoute
+  '/twin': typeof TwinRoute
+  '/wildlife': typeof WildlifeRoute
+  '/api/analyze': typeof ApiAnalyzeRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/analytics': typeof AnalyticsRoute
+  '/audio': typeof AudioRoute
+  '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/demo': typeof DemoRoute
+  '/emergency': typeof EmergencyRoute
+  '/faq': typeof FaqRoute
+  '/health': typeof HealthRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/lost': typeof LostRoute
+  '/shelter': typeof ShelterRoute
+  '/twin': typeof TwinRoute
+  '/wildlife': typeof WildlifeRoute
+  '/api/analyze': typeof ApiAnalyzeRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
+  '/analytics': typeof AnalyticsRoute
+  '/audio': typeof AudioRoute
+  '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
+  '/demo': typeof DemoRoute
+  '/emergency': typeof EmergencyRoute
+  '/faq': typeof FaqRoute
+  '/health': typeof HealthRoute
+  '/how-it-works': typeof HowItWorksRoute
+  '/lost': typeof LostRoute
+  '/shelter': typeof ShelterRoute
+  '/twin': typeof TwinRoute
+  '/wildlife': typeof WildlifeRoute
+  '/api/analyze': typeof ApiAnalyzeRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/analytics'
+    | '/audio'
+    | '/auth'
+    | '/contact'
+    | '/demo'
+    | '/emergency'
+    | '/faq'
+    | '/health'
+    | '/how-it-works'
+    | '/lost'
+    | '/shelter'
+    | '/twin'
+    | '/wildlife'
+    | '/api/analyze'
+    | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/analytics'
+    | '/audio'
+    | '/auth'
+    | '/contact'
+    | '/demo'
+    | '/emergency'
+    | '/faq'
+    | '/health'
+    | '/how-it-works'
+    | '/lost'
+    | '/shelter'
+    | '/twin'
+    | '/wildlife'
+    | '/api/analyze'
+    | '/api/chat'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/admin'
+    | '/analytics'
+    | '/audio'
+    | '/auth'
+    | '/contact'
+    | '/demo'
+    | '/emergency'
+    | '/faq'
+    | '/health'
+    | '/how-it-works'
+    | '/lost'
+    | '/shelter'
+    | '/twin'
+    | '/wildlife'
+    | '/api/analyze'
+    | '/api/chat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
+  AnalyticsRoute: typeof AnalyticsRoute
+  AudioRoute: typeof AudioRoute
+  AuthRoute: typeof AuthRoute
+  ContactRoute: typeof ContactRoute
+  DemoRoute: typeof DemoRoute
+  EmergencyRoute: typeof EmergencyRoute
+  FaqRoute: typeof FaqRoute
+  HealthRoute: typeof HealthRoute
+  HowItWorksRoute: typeof HowItWorksRoute
+  LostRoute: typeof LostRoute
+  ShelterRoute: typeof ShelterRoute
+  TwinRoute: typeof TwinRoute
+  WildlifeRoute: typeof WildlifeRoute
+  ApiAnalyzeRoute: typeof ApiAnalyzeRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wildlife': {
+      id: '/wildlife'
+      path: '/wildlife'
+      fullPath: '/wildlife'
+      preLoaderRoute: typeof WildlifeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/twin': {
+      id: '/twin'
+      path: '/twin'
+      fullPath: '/twin'
+      preLoaderRoute: typeof TwinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shelter': {
+      id: '/shelter'
+      path: '/shelter'
+      fullPath: '/shelter'
+      preLoaderRoute: typeof ShelterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lost': {
+      id: '/lost'
+      path: '/lost'
+      fullPath: '/lost'
+      preLoaderRoute: typeof LostRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/health': {
+      id: '/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/emergency': {
+      id: '/emergency'
+      path: '/emergency'
+      fullPath: '/emergency'
+      preLoaderRoute: typeof EmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/demo': {
+      id: '/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof DemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audio': {
+      id: '/audio'
+      path: '/audio'
+      fullPath: '/audio'
+      preLoaderRoute: typeof AudioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +378,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analyze': {
+      id: '/api/analyze'
+      path: '/api/analyze'
+      fullPath: '/api/analyze'
+      preLoaderRoute: typeof ApiAnalyzeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
+  AnalyticsRoute: AnalyticsRoute,
+  AudioRoute: AudioRoute,
+  AuthRoute: AuthRoute,
+  ContactRoute: ContactRoute,
+  DemoRoute: DemoRoute,
+  EmergencyRoute: EmergencyRoute,
+  FaqRoute: FaqRoute,
+  HealthRoute: HealthRoute,
+  HowItWorksRoute: HowItWorksRoute,
+  LostRoute: LostRoute,
+  ShelterRoute: ShelterRoute,
+  TwinRoute: TwinRoute,
+  WildlifeRoute: WildlifeRoute,
+  ApiAnalyzeRoute: ApiAnalyzeRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
