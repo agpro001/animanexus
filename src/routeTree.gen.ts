@@ -15,6 +15,7 @@ import { Route as ShelterRouteImport } from './routes/shelter'
 import { Route as LostRouteImport } from './routes/lost'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -54,6 +55,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmergencyRoute = EmergencyRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
+  '/faq': typeof FaqRoute
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
+  '/faq': typeof FaqRoute
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
+  '/faq': typeof FaqRoute
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/demo'
     | '/emergency'
+    | '/faq'
     | '/health'
     | '/how-it-works'
     | '/lost'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/demo'
     | '/emergency'
+    | '/faq'
     | '/health'
     | '/how-it-works'
     | '/lost'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/demo'
     | '/emergency'
+    | '/faq'
     | '/health'
     | '/how-it-works'
     | '/lost'
@@ -228,6 +240,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DemoRoute: typeof DemoRoute
   EmergencyRoute: typeof EmergencyRoute
+  FaqRoute: typeof FaqRoute
   HealthRoute: typeof HealthRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LostRoute: typeof LostRoute
@@ -280,6 +293,13 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/emergency': {
@@ -364,6 +384,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DemoRoute: DemoRoute,
   EmergencyRoute: EmergencyRoute,
+  FaqRoute: FaqRoute,
   HealthRoute: HealthRoute,
   HowItWorksRoute: HowItWorksRoute,
   LostRoute: LostRoute,
