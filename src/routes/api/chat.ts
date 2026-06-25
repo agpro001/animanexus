@@ -18,21 +18,55 @@ export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const requestId =
+          request.headers.get("x-request-id") ||
+          (globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`);
+        const model = "google/gemini-3-flash-preview";
+        const logError = async (status: number, error_message: string, meta?: Record<string, unknown>) => {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await supabaseAdmin.from("ai_errors").insert({
+              request_id: requestId, route: "/api/chat", status, model, kind: "chat",
+              error_message: error_message.slice(0, 2000), meta: meta ?? null,
+            });
+          } catch (e) { console.error("[chat] failed to log error", e); }
+        };
         try {
-          const { messages } = (await request.json()) as { messages?: UIMessage[] };
-          if (!Array.isArray(messages)) return new Response("Messages required", { status: 400 });
+          const body = (await request.json().catch(() => null)) as { messages?: UIMessage[] } | null;
+          if (!body || !Array.isArray(body.messages)) {
+            await logError(400, "messages array required");
+            return new Response(JSON.stringify({ error: "messages array required", requestId }), {
+              status: 400, headers: { "content-type": "application/json", "x-request-id": requestId },
+            });
+          }
+          const messages = body.messages;
           const key = process.env.LOVABLE_API_KEY;
-          if (!key) return new Response("Missing LOVABLE_API_KEY", { status: 500 });
+          if (!key) {
+            await logError(500, "Missing LOVABLE_API_KEY");
+            return new Response(JSON.stringify({ error: "AI gateway not configured", requestId }), {
+              status: 500, headers: { "content-type": "application/json", "x-request-id": requestId },
+            });
+          }
           const gateway = createLovableAiGatewayProvider(key);
           const result = streamText({
-            model: gateway("google/gemini-3-flash-preview"),
+            model: gateway(model),
             system: SYSTEM,
             messages: await convertToModelMessages(messages),
+            onError: ({ error }) => {
+              const msg = error instanceof Error ? error.message : String(error);
+              void logError(502, `stream error: ${msg}`);
+            },
           });
-          return result.toUIMessageStreamResponse({ originalMessages: messages });
+          const response = result.toUIMessageStreamResponse({ originalMessages: messages });
+          response.headers.set("x-request-id", requestId);
+          return response;
         } catch (err) {
-          console.error("chat handler error", err);
-          return new Response("Chat failure", { status: 500 });
+          const msg = err instanceof Error ? err.message : String(err);
+          console.error("[chat] handler error", requestId, msg);
+          await logError(500, msg);
+          return new Response(JSON.stringify({ error: "Chat failure", requestId }), {
+            status: 500, headers: { "content-type": "application/json", "x-request-id": requestId },
+          });
         }
       },
     },
