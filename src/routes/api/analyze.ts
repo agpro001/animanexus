@@ -41,7 +41,8 @@ export const Route = createFileRoute("/api/analyze")({
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
             await supabaseAdmin.from("ai_errors").insert({
               request_id: requestId, route: "/api/analyze", status, model, kind,
-              error_message: error_message.slice(0, 2000), meta: meta ?? null,
+              error_message: error_message.slice(0, 2000),
+              meta: meta ? (JSON.parse(JSON.stringify(meta)) as never) : null,
             });
           } catch (e) { console.error("[analyze] failed to log error", e); }
         };

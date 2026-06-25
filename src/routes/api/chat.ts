@@ -27,7 +27,8 @@ export const Route = createFileRoute("/api/chat")({
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
             await supabaseAdmin.from("ai_errors").insert({
               request_id: requestId, route: "/api/chat", status, model, kind: "chat",
-              error_message: error_message.slice(0, 2000), meta: meta ?? null,
+              error_message: error_message.slice(0, 2000),
+              meta: meta ? (JSON.parse(JSON.stringify(meta)) as never) : null,
             });
           } catch (e) { console.error("[chat] failed to log error", e); }
         };
