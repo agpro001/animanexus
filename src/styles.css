@@ -185,3 +185,17 @@
   animation: wave-pulse 2.4s ease-out infinite;
 }
 .animate-wave-pulse::after { animation-delay: 1.2s; }
+
+/* Feature cube 3D hover */
+.feature-cube .cube-face {
+  transform: rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
+  transform-style: preserve-3d;
+  transition: transform 220ms cubic-bezier(.2,.7,.2,1);
+  will-change: transform;
+}
+.feature-cube:hover .cube-face { transform: rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateZ(4px); }
+
+@keyframes orbit-ring { to { transform: rotate(360deg); } }
+@keyframes hue-shift { to { filter: hue-rotate(360deg); } }
+.animate-orbit-ring { animation: orbit-ring 14s linear infinite; }
+.animate-hue-shift { animation: hue-shift 8s linear infinite; }
