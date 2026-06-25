@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, PlayCircle, Activity, Brain, MapPin, Heart, Globe2, AudioLines, Siren, BarChart3, Shield, Cpu, Radio, Sparkles } from "lucide-react";
+import { ArrowRight, PlayCircle, Activity, Brain, MapPin, Heart, Globe2, AudioLines, Siren, BarChart3, Shield, Cpu, Radio, Sparkles, Workflow, PlaySquare, HelpCircle, Info, Mail } from "lucide-react";
 import { NexusGlobe } from "@/components/anima/globe";
 import { AnimatedCounter, FadeIn, GhostButton, GlassCard, NeonButton, RiskBadge, SectionHeading, StatRing } from "@/components/anima/ui";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { FeatureCube } from "@/components/anima/feature-cube";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -53,12 +54,46 @@ function Index() {
   return (
     <div className="relative overflow-x-hidden">
       <Hero />
+      <FeatureCubes />
       <Modules />
       <LivePreview />
       <HowSection />
       <ImpactBand />
       <CTA />
     </div>
+  );
+}
+
+const CUBES = [
+  { to: "/how-it-works", label: "How It Works", icon: Workflow, color: "oklch(0.85 0.18 200)" },
+  { to: "/twin", label: "Digital Twin", icon: Activity, color: "oklch(0.85 0.18 200)" },
+  { to: "/health", label: "Health AI", icon: Brain, color: "oklch(0.75 0.24 300)" },
+  { to: "/lost", label: "Lost Pets", icon: MapPin, color: "oklch(0.8 0.2 165)" },
+  { to: "/shelter", label: "Shelter", icon: Heart, color: "oklch(0.75 0.24 0)" },
+  { to: "/wildlife", label: "Wildlife", icon: Globe2, color: "oklch(0.84 0.18 80)" },
+  { to: "/audio", label: "Audio", icon: AudioLines, color: "oklch(0.85 0.18 200)" },
+  { to: "/emergency", label: "Emergency", icon: Siren, color: "oklch(0.7 0.24 20)" },
+  { to: "/analytics", label: "Analytics", icon: BarChart3, color: "oklch(0.75 0.24 300)" },
+  { to: "/demo", label: "Demo Mode", icon: PlaySquare, color: "oklch(0.8 0.2 165)" },
+  { to: "/faq", label: "FAQ", icon: HelpCircle, color: "oklch(0.84 0.18 80)" },
+  { to: "/about", label: "About", icon: Info, color: "oklch(0.85 0.18 200)" },
+  { to: "/contact", label: "Contact", icon: Mail, color: "oklch(0.75 0.24 300)" },
+] as const;
+
+function FeatureCubes() {
+  return (
+    <section className="mx-auto max-w-7xl px-6 pb-10 pt-6">
+      <SectionHeading
+        eyebrow="Jump in"
+        title={<>Explore the <span className="text-gradient">Nexus</span></>}
+        kicker="Tap any cube to enter that module. Each one is live and fully working."
+      />
+      <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
+        {CUBES.map((c, i) => (
+          <FeatureCube key={c.to} {...c} delay={i * 0.04} />
+        ))}
+      </div>
+    </section>
   );
 }
 
