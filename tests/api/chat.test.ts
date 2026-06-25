@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 
 /**
  * Integration tests for /api/chat.
@@ -87,7 +87,4 @@ describe("/api/chat POST", () => {
   });
 });
 
-// restore
-afterAll?.(() => { globalThis.fetch = originalFetch; });
-// vitest exposes afterAll on import; guarded for safety
-declare const afterAll: ((fn: () => void) => void) | undefined;
+afterAll(() => { globalThis.fetch = originalFetch; });
