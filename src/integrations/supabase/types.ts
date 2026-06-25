@@ -236,13 +236,44 @@ export type Database = {
           },
         ]
       }
+      lost_report_contacts: {
+        Row: {
+          contact: string | null
+          created_at: string
+          lost_report_id: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          contact?: string | null
+          created_at?: string
+          lost_report_id: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          contact?: string | null
+          created_at?: string
+          lost_report_id?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lost_report_contacts_lost_report_id_fkey"
+            columns: ["lost_report_id"]
+            isOneToOne: true
+            referencedRelation: "lost_reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lost_reports: {
         Row: {
           ai_tags: Json | null
           breed: string | null
           collar: string | null
           color: string | null
-          contact: string | null
           created_at: string
           id: string
           last_seen_address: string | null
@@ -263,7 +294,6 @@ export type Database = {
           breed?: string | null
           collar?: string | null
           color?: string | null
-          contact?: string | null
           created_at?: string
           id?: string
           last_seen_address?: string | null
@@ -284,7 +314,6 @@ export type Database = {
           breed?: string | null
           collar?: string | null
           color?: string | null
-          contact?: string | null
           created_at?: string
           id?: string
           last_seen_address?: string | null
