@@ -62,14 +62,15 @@ export function Nav() {
       {open && (
         <div className="xl:hidden">
           <nav className="mx-auto grid max-w-7xl gap-1 border-t border-white/5 px-4 py-3 text-sm">
-            {PRIMARY.map((l) => (
+            {[
+              { to: "/", label: "Home" },
+              { to: "/demo", label: "Demo" },
+              { to: "/emergency", label: "Emergency" },
+              { to: "/contact", label: "Contact" },
+            ].map((l) => (
               <Link key={l.to} to={l.to as never} onClick={() => setOpen(false)}
                 className="rounded-md px-3 py-2 text-muted-foreground hover:bg-white/5 hover:text-foreground">{l.label}</Link>
             ))}
-            <Link to="/demo" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 text-muted-foreground hover:bg-white/5">Demo Mode</Link>
-            <Link to="/faq" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 text-muted-foreground hover:bg-white/5">FAQ</Link>
-            <Link to="/about" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 text-muted-foreground hover:bg-white/5">About</Link>
-            <Link to="/contact" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 text-muted-foreground hover:bg-white/5">Contact</Link>
             {user ? (
               <>
                 <Link to="/admin" onClick={() => setOpen(false)} className="rounded-md px-3 py-2 text-muted-foreground hover:bg-white/5">Admin</Link>
