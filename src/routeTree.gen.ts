@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WildlifeRouteImport } from './routes/wildlife'
 import { Route as TwinRouteImport } from './routes/twin'
 import { Route as ShelterRouteImport } from './routes/shelter'
+import { Route as SecurityRouteImport } from './routes/security'
 import { Route as LostRouteImport } from './routes/lost'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HealthRouteImport } from './routes/health'
@@ -25,6 +26,7 @@ import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiWildlifeFeedRouteImport } from './routes/api/wildlife-feed'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiAnalyzeRouteImport } from './routes/api/analyze'
 
@@ -41,6 +43,11 @@ const TwinRoute = TwinRouteImport.update({
 const ShelterRoute = ShelterRouteImport.update({
   id: '/shelter',
   path: '/shelter',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LostRoute = LostRouteImport.update({
@@ -108,6 +115,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiWildlifeFeedRoute = ApiWildlifeFeedRouteImport.update({
+  id: '/api/wildlife-feed',
+  path: '/api/wildlife-feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -133,11 +145,13 @@ export interface FileRoutesByFullPath {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
   '/wildlife': typeof WildlifeRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -153,11 +167,13 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
   '/wildlife': typeof WildlifeRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -174,11 +190,13 @@ export interface FileRoutesById {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
   '/wildlife': typeof WildlifeRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -196,11 +214,13 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/security'
     | '/shelter'
     | '/twin'
     | '/wildlife'
     | '/api/analyze'
     | '/api/chat'
+    | '/api/wildlife-feed'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -216,11 +236,13 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/security'
     | '/shelter'
     | '/twin'
     | '/wildlife'
     | '/api/analyze'
     | '/api/chat'
+    | '/api/wildlife-feed'
   id:
     | '__root__'
     | '/'
@@ -236,11 +258,13 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/security'
     | '/shelter'
     | '/twin'
     | '/wildlife'
     | '/api/analyze'
     | '/api/chat'
+    | '/api/wildlife-feed'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -257,11 +281,13 @@ export interface RootRouteChildren {
   HealthRoute: typeof HealthRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LostRoute: typeof LostRoute
+  SecurityRoute: typeof SecurityRoute
   ShelterRoute: typeof ShelterRoute
   TwinRoute: typeof TwinRoute
   WildlifeRoute: typeof WildlifeRoute
   ApiAnalyzeRoute: typeof ApiAnalyzeRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiWildlifeFeedRoute: typeof ApiWildlifeFeedRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -285,6 +311,13 @@ declare module '@tanstack/react-router' {
       path: '/shelter'
       fullPath: '/shelter'
       preLoaderRoute: typeof ShelterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lost': {
@@ -378,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/wildlife-feed': {
+      id: '/api/wildlife-feed'
+      path: '/api/wildlife-feed'
+      fullPath: '/api/wildlife-feed'
+      preLoaderRoute: typeof ApiWildlifeFeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -409,22 +449,14 @@ const rootRouteChildren: RootRouteChildren = {
   HealthRoute: HealthRoute,
   HowItWorksRoute: HowItWorksRoute,
   LostRoute: LostRoute,
+  SecurityRoute: SecurityRoute,
   ShelterRoute: ShelterRoute,
   TwinRoute: TwinRoute,
   WildlifeRoute: WildlifeRoute,
   ApiAnalyzeRoute: ApiAnalyzeRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiWildlifeFeedRoute: ApiWildlifeFeedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

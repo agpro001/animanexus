@@ -99,7 +99,7 @@ export function Footer() {
           </p>
         </div>
         <FooterCol title="Platform" links={[["Digital Twin","/twin"],["Health AI","/health"],["Lost Pets","/lost"],["Shelter","/shelter"],["Wildlife","/wildlife"]]} />
-        <FooterCol title="Company" links={[["About","/about"],["How It Works","/how-it-works"],["FAQ","/faq"],["Contact","/contact"]]} />
+        <FooterCol title="Company" links={[["About","/about"],["How It Works","/how-it-works"],["FAQ","/faq"],["Contact","/contact"],["Security","/security"]]} />
         <FooterCol title="Try" links={[["Live Demo","/demo"],["Analytics","/analytics"],["Emergency","/emergency"],["Audio","/audio"]]} />
       </div>
       <div className="border-t border-white/5 px-6 py-4 text-center text-xs text-muted-foreground">

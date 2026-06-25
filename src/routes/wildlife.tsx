@@ -14,15 +14,7 @@ export const Route = createFileRoute("/wildlife")({
 });
 
 type Alert = { id: string; zone_name: string; threat: string; severity: number; description: string|null; status: string; created_at: string };
-
-const SEED_ZONES = [
-  { name: "Serengeti N4", health: 71, threats: ["drought","poaching"] },
-  { name: "Borneo Lowland", health: 58, threats: ["fire","deforestation"] },
-  { name: "Amazonia Sector 7", health: 64, threats: ["fire","drought"] },
-  { name: "Yellowstone E", health: 88, threats: [] },
-  { name: "Iberian Lynx Range", health: 79, threats: ["road"] },
-  { name: "Sundarbans", health: 52, threats: ["flood","poaching"] },
-];
+type LiveThreat = { id: string; source: string; category: string; severity: number; title: string; lat: number; lon: number; date: string; link?: string };
 
 const THREATS = [
   { id: "fire", icon: Flame, color: "var(--neon-pink)", label: "Fire" },
@@ -32,47 +24,95 @@ const THREATS = [
   { id: "deforestation", icon: Trees, color: "var(--neon-emerald)", label: "Deforestation" },
 ] as const;
 
+function categoryIcon(cat: string) {
+  const c = cat.toLowerCase();
+  if (c.includes("fire")) return Flame;
+  if (c.includes("flood") || c.includes("water")) return Droplet;
+  if (c.includes("storm") || c.includes("temp")) return AlertTriangle;
+  if (c.includes("earth") || c.includes("volcano") || c.includes("landslide")) return Globe2;
+  return Trees;
+}
+
 function WildlifePage() {
   const { user } = useAuth();
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [live, setLive] = useState<LiveThreat[]>([]);
+  const [liveTs, setLiveTs] = useState<number | null>(null);
+  const [liveLoading, setLiveLoading] = useState(true);
   const [reportOpen, setReportOpen] = useState(false);
 
   const load = async () => {
     const { data } = await supabase.from("wildlife_alerts").select("*").order("created_at", { ascending: false }).limit(20);
     setAlerts((data as Alert[]) ?? []);
   };
-  useEffect(() => { load(); }, []);
+  const loadLive = async () => {
+    try {
+      setLiveLoading(true);
+      const r = await fetch("/api/wildlife-feed", { headers: { Accept: "application/json" } });
+      const j = (await r.json()) as { threats: LiveThreat[]; ts: number };
+      setLive(j.threats ?? []);
+      setLiveTs(j.ts ?? Date.now());
+    } catch (e) {
+      console.error("wildlife feed failed", e);
+    } finally { setLiveLoading(false); }
+  };
+  useEffect(() => {
+    load(); loadLive();
+    const id = setInterval(loadLive, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <>
       <PageHeader eyebrow="Module · Wildlife Guardian" title={<>Conservation, <span className="text-gradient">in command.</span></>}
-        kicker="Habitat health scoring, climate threats, and poaching alerts — visualized as a live mission map.">
+        kicker="Live habitat threats from NASA EONET and USGS, combined with on-platform poaching reports and AI severity scoring.">
         {user && <div className="mt-6"><NeonButton onClick={() => setReportOpen(true)}>Report a threat</NeonButton></div>}
       </PageHeader>
       <PageSection>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-[var(--neon-emerald)]">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--neon-emerald)] shadow-[0_0_8px_currentColor]" />
+            Live feed · NASA EONET + USGS · {live.length} active events
+          </div>
+          <span className="text-[11px] text-muted-foreground">{liveTs ? `updated ${new Date(liveTs).toLocaleTimeString()}` : liveLoading ? "loading…" : ""}</span>
+        </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {SEED_ZONES.map((z, i) => (
-            <FadeIn key={z.name} delay={i * 0.05}>
-              <GlassCard glow="cyan">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2"><Globe2 className="h-5 w-5 text-[var(--neon-emerald)]" /><div className="font-display text-sm font-semibold">{z.name}</div></div>
-                  <span className={`text-xs font-mono ${z.health > 75 ? "text-[var(--neon-emerald)]" : z.health > 60 ? "text-[var(--neon-amber)]" : "text-[var(--neon-pink)]"}`}>{z.health}%</span>
-                </div>
-                <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
-                  <div className="h-full rounded-full" style={{ width: `${z.health}%`, background: z.health > 75 ? "var(--neon-emerald)" : z.health > 60 ? "var(--neon-amber)" : "var(--neon-pink)" }} />
-                </div>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {z.threats.length === 0 ? <span className="text-xs text-muted-foreground">No active threats</span> : z.threats.map((t) => {
-                    const T = THREATS.find((x) => x.id === t);
-                    if (!T) return null;
-                    return <span key={t} className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px]" style={{ borderColor: `${T.color}40`, color: T.color, background: `${T.color}10` }}>
-                      <T.icon className="h-3 w-3" /> {T.label}
-                    </span>;
-                  })}
-                </div>
-              </GlassCard>
-            </FadeIn>
-          ))}
+          {liveLoading && live.length === 0 ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <GlassCard key={i}><div className="h-24 animate-pulse rounded bg-white/5" /></GlassCard>
+            ))
+          ) : live.length === 0 ? (
+            <GlassCard className="sm:col-span-2 lg:col-span-3 text-center text-sm text-muted-foreground">
+              No active global events reported by NASA EONET in the last 20 days.
+            </GlassCard>
+          ) : live.slice(0, 9).map((t, i) => {
+            const Icon = categoryIcon(t.category);
+            const color = t.severity >= 5 ? "var(--neon-pink)" : t.severity >= 4 ? "var(--neon-amber)" : "var(--neon-cyan)";
+            return (
+              <FadeIn key={t.id} delay={i * 0.04}>
+                <GlassCard glow="cyan">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Icon className="h-5 w-5" style={{ color }} />
+                      <div className="font-display text-sm font-semibold">{t.category}</div>
+                    </div>
+                    <span className="rounded-full border px-2 py-0.5 text-[10px] font-mono" style={{ borderColor: `${color}55`, color }}>
+                      sev {t.severity}/5
+                    </span>
+                  </div>
+                  <div className="mt-2 line-clamp-2 text-sm text-foreground/90">{t.title}</div>
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
+                    <span className="font-mono">{t.lat.toFixed(2)}°, {t.lon.toFixed(2)}°</span>
+                    <span>{new Date(t.date).toLocaleDateString()}</span>
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-[10px] text-muted-foreground">
+                    <span className="font-mono uppercase tracking-widest">{t.source}</span>
+                    {t.link && <a href={t.link} target="_blank" rel="noreferrer" className="text-[var(--neon-cyan)] hover:underline">source ↗</a>}
+                  </div>
+                </GlassCard>
+              </FadeIn>
+            );
+          })}
         </div>
 
         <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -93,8 +133,8 @@ function WildlifePage() {
           </GlassCard>
 
           <GlassCard>
-            <h3 className="flex items-center gap-2 font-display text-lg font-semibold"><Globe2 className="h-5 w-5 text-[var(--neon-cyan)]" /> Threat heatmap</h3>
-            <Heatmap />
+            <h3 className="flex items-center gap-2 font-display text-lg font-semibold"><Globe2 className="h-5 w-5 text-[var(--neon-cyan)]" /> Live threat heatmap</h3>
+            <Heatmap points={live} />
           </GlassCard>
         </div>
       </PageSection>
@@ -104,24 +144,28 @@ function WildlifePage() {
   );
 }
 
-function Heatmap() {
+function Heatmap({ points }: { points: LiveThreat[] }) {
+  const pts = points.slice(0, 40);
   return (
     <div className="relative mt-3 h-64 overflow-hidden rounded-md border border-white/10 bg-[oklch(0.1_0.025_260)]">
       <div className="absolute inset-0 grid-bg opacity-30" />
-      {[
-        { x: 15, y: 30, c: "var(--neon-pink)", s: 1 },
-        { x: 35, y: 60, c: "var(--neon-amber)", s: 1.4 },
-        { x: 65, y: 25, c: "var(--neon-pink)", s: 1.2 },
-        { x: 80, y: 70, c: "var(--neon-amber)", s: 0.8 },
-        { x: 45, y: 45, c: "var(--neon-emerald)", s: 1 },
-      ].map((p, i) => (
-        <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full" style={{
-          left: `${p.x}%`, top: `${p.y}%`,
-          width: 80 * p.s, height: 80 * p.s,
-          background: `radial-gradient(circle, ${p.c}55, transparent 70%)`,
-          filter: "blur(2px)",
-        }} />
-      ))}
+      {pts.length === 0 && (
+        <div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Awaiting live signal…</div>
+      )}
+      {pts.map((p) => {
+        const x = ((p.lon + 180) / 360) * 100;
+        const y = ((90 - p.lat) / 180) * 100;
+        const c = p.severity >= 5 ? "var(--neon-pink)" : p.severity >= 4 ? "var(--neon-amber)" : "var(--neon-cyan)";
+        const size = 30 + p.severity * 14;
+        return (
+          <div key={p.id} title={p.title} className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full" style={{
+            left: `${x}%`, top: `${y}%`,
+            width: size, height: size,
+            background: `radial-gradient(circle, ${c}66, transparent 70%)`,
+            filter: "blur(2px)",
+          }} />
+        );
+      })}
     </div>
   );
 }

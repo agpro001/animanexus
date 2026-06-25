@@ -32,11 +32,35 @@ export const Route = createFileRoute("/api/analyze")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const requestId =
+          request.headers.get("x-request-id") ||
+          (globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`);
+        const model = "google/gemini-3-flash-preview";
+        const logError = async (status: number, kind: string | null, error_message: string, meta?: Record<string, unknown>) => {
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            await supabaseAdmin.from("ai_errors").insert({
+              request_id: requestId, route: "/api/analyze", status, model, kind,
+              error_message: error_message.slice(0, 2000),
+              meta: meta ? (JSON.parse(JSON.stringify(meta)) as never) : null,
+            });
+          } catch (e) { console.error("[analyze] failed to log error", e); }
+        };
+        const respond = (status: number, payload: Record<string, unknown>) =>
+          new Response(JSON.stringify({ ...payload, requestId }), {
+            status, headers: { "content-type": "application/json", "x-request-id": requestId },
+          });
         let body: Body;
         try { body = (await request.json()) as Body; }
-        catch { return Response.json({ error: "invalid_json" }, { status: 400 }); }
+        catch {
+          await logError(400, null, "invalid_json");
+          return respond(400, { error: "invalid_json" });
+        }
         const { kind, prompt, imageDataUrl, audio, context } = body;
-        if (!kind || !SYSTEMS[kind]) return Response.json({ error: "invalid_kind" }, { status: 400 });
+        if (!kind || !SYSTEMS[kind]) {
+          await logError(400, kind ?? null, "invalid_kind");
+          return respond(400, { error: "invalid_kind" });
+        }
 
         const userContent: Array<Record<string, unknown>> = [];
         const userText = [prompt, context ? `Context: ${JSON.stringify(context)}` : null].filter(Boolean).join("\n\n");
@@ -47,7 +71,7 @@ export const Route = createFileRoute("/api/analyze")({
 
         try {
           const r = await callLovableAI({
-            model: "google/gemini-3-flash-preview",
+            model,
             messages: [
               { role: "system", content: SYSTEMS[kind] },
               { role: "user", content: userContent },
@@ -56,16 +80,19 @@ export const Route = createFileRoute("/api/analyze")({
           });
           if (!r.ok) {
             const text = await r.text();
-            return Response.json({ error: "ai_error", status: r.status, detail: text }, { status: r.status });
+            await logError(r.status, kind, `ai_error: ${text.slice(0, 500)}`);
+            return respond(r.status, { error: "ai_error", status: r.status, detail: text });
           }
           const json = (await r.json()) as { choices?: { message?: { content?: string } }[] };
           const content = json.choices?.[0]?.message?.content ?? "{}";
           let parsed: unknown;
           try { parsed = JSON.parse(content); } catch { parsed = { raw: content }; }
-          return Response.json({ result: parsed });
+          return respond(200, { result: parsed });
         } catch (e) {
-          console.error("analyze error", e);
-          return Response.json({ error: "server_error", detail: String(e) }, { status: 500 });
+          const msg = e instanceof Error ? e.message : String(e);
+          console.error("[analyze] error", requestId, msg);
+          await logError(500, kind, msg);
+          return respond(500, { error: "server_error", detail: msg });
         }
       },
     },
