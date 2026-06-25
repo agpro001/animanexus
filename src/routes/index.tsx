@@ -65,19 +65,19 @@ function Index() {
 }
 
 const CUBES = [
-  { to: "/how-it-works", label: "How It Works", icon: Workflow, color: "oklch(0.85 0.18 200)" },
-  { to: "/twin", label: "Digital Twin", icon: Activity, color: "oklch(0.85 0.18 200)" },
-  { to: "/health", label: "Health AI", icon: Brain, color: "oklch(0.75 0.24 300)" },
-  { to: "/lost", label: "Lost Pets", icon: MapPin, color: "oklch(0.8 0.2 165)" },
-  { to: "/shelter", label: "Shelter", icon: Heart, color: "oklch(0.75 0.24 0)" },
-  { to: "/wildlife", label: "Wildlife", icon: Globe2, color: "oklch(0.84 0.18 80)" },
-  { to: "/audio", label: "Audio", icon: AudioLines, color: "oklch(0.85 0.18 200)" },
-  { to: "/emergency", label: "Emergency", icon: Siren, color: "oklch(0.7 0.24 20)" },
-  { to: "/analytics", label: "Analytics", icon: BarChart3, color: "oklch(0.75 0.24 300)" },
-  { to: "/demo", label: "Demo Mode", icon: PlaySquare, color: "oklch(0.8 0.2 165)" },
-  { to: "/faq", label: "FAQ", icon: HelpCircle, color: "oklch(0.84 0.18 80)" },
-  { to: "/about", label: "About", icon: Info, color: "oklch(0.85 0.18 200)" },
-  { to: "/contact", label: "Contact", icon: Mail, color: "oklch(0.75 0.24 300)" },
+  { to: "/how-it-works", label: "How It Works", icon: Workflow, color: "oklch(0.85 0.18 200)", description: "The full pipeline from twin to action plan." },
+  { to: "/twin", label: "Digital Twin", icon: Activity, color: "oklch(0.85 0.18 200)", description: "Live AI profile for every animal." },
+  { to: "/health", label: "Health AI", icon: Brain, color: "oklch(0.75 0.24 300)", description: "Photo and symptom triage with risk score." },
+  { to: "/lost", label: "Lost Pets", icon: MapPin, color: "oklch(0.8 0.2 165)", description: "Visual matching and predictive search." },
+  { to: "/shelter", label: "Shelter", icon: Heart, color: "oklch(0.75 0.24 0)", description: "Adopter compatibility ranking." },
+  { to: "/wildlife", label: "Wildlife", icon: Globe2, color: "oklch(0.84 0.18 80)", description: "Live NASA events and threat heatmap." },
+  { to: "/audio", label: "Audio", icon: AudioLines, color: "oklch(0.85 0.18 200)", description: "Decode barks, meows, and calls." },
+  { to: "/emergency", label: "Emergency", icon: Siren, color: "oklch(0.7 0.24 20)", description: "One-tap SOS with first-aid plan." },
+  { to: "/analytics", label: "Analytics", icon: BarChart3, color: "oklch(0.75 0.24 300)", description: "Impact metrics across the ecosystem." },
+  { to: "/demo", label: "Demo Mode", icon: PlaySquare, color: "oklch(0.8 0.2 165)", description: "Guided tour of the platform." },
+  { to: "/faq", label: "FAQ", icon: HelpCircle, color: "oklch(0.84 0.18 80)", description: "Answers to common questions." },
+  { to: "/about", label: "About", icon: Info, color: "oklch(0.85 0.18 200)", description: "Mission, vision, and the team." },
+  { to: "/contact", label: "Contact", icon: Mail, color: "oklch(0.75 0.24 300)", description: "Reach the ANIMA Nexus team." },
 ] as const;
 
 function FeatureCubes() {
@@ -88,9 +88,9 @@ function FeatureCubes() {
         title={<>Explore the <span className="text-gradient">Nexus</span></>}
         kicker="Tap any cube to enter that module. Each one is live and fully working."
       />
-      <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
+      <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5">
         {CUBES.map((c, i) => (
-          <FeatureCube key={c.to} {...c} delay={i * 0.04} />
+          <FeatureCube key={c.to} {...c} delay={i * 0.03} />
         ))}
       </div>
     </section>
