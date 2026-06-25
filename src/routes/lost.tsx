@@ -17,13 +17,13 @@ export const Route = createFileRoute("/lost")({
 type Report = {
   id: string; name: string; species: string; breed: string|null; color: string|null;
   last_seen_address: string|null; photo_url: string|null; status: string;
-  created_at: string; contact: string|null;
+  created_at: string;
 };
 
 const SEED: Report[] = [
-  { id: "s1", name: "Pixel", species: "Cat", breed: "Tabby", color: "Orange", last_seen_address: "Mission District, SF", photo_url: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600", status: "searching", created_at: new Date(Date.now()-1000*60*60*5).toISOString(), contact: null },
-  { id: "s2", name: "Bear", species: "Dog", breed: "Goldendoodle", color: "Cream", last_seen_address: "Brooklyn, NY", photo_url: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600", status: "searching", created_at: new Date(Date.now()-1000*60*60*30).toISOString(), contact: null },
-  { id: "s3", name: "Mochi", species: "Dog", breed: "Shiba Inu", color: "Tan", last_seen_address: "Shibuya, Tokyo", photo_url: "https://images.unsplash.com/photo-1612536057832-2ff7ead58194?w=600", status: "found", created_at: new Date(Date.now()-1000*60*60*48).toISOString(), contact: null },
+  { id: "s1", name: "Pixel", species: "Cat", breed: "Tabby", color: "Orange", last_seen_address: "Mission District, SF", photo_url: "https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600", status: "searching", created_at: new Date(Date.now()-1000*60*60*5).toISOString() },
+  { id: "s2", name: "Bear", species: "Dog", breed: "Goldendoodle", color: "Cream", last_seen_address: "Brooklyn, NY", photo_url: "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600", status: "searching", created_at: new Date(Date.now()-1000*60*60*30).toISOString() },
+  { id: "s3", name: "Mochi", species: "Dog", breed: "Shiba Inu", color: "Tan", last_seen_address: "Shibuya, Tokyo", photo_url: "https://images.unsplash.com/photo-1612536057832-2ff7ead58194?w=600", status: "found", created_at: new Date(Date.now()-1000*60*60*48).toISOString() },
 ];
 
 function LostPage() {
@@ -160,10 +160,16 @@ function ReportDialog({ onClose, onSaved, userId }: { onClose: () => void; onSav
           photo_url = data?.signedUrl ?? null;
         }
       }
-      const { error } = await supabase.from("lost_reports").insert({
-        owner_id: userId, ...form, photo_url, last_seen_at: new Date().toISOString(),
-      });
+      const { contact, ...rest } = form;
+      const { data: inserted, error } = await supabase.from("lost_reports").insert({
+        owner_id: userId, ...rest, photo_url, last_seen_at: new Date().toISOString(),
+      }).select("id").single();
       if (error) { toast.error(error.message); return; }
+      if (contact && inserted?.id) {
+        await supabase.from("lost_report_contacts").insert({
+          lost_report_id: inserted.id, owner_id: userId, contact,
+        });
+      }
       toast.success("Report posted — community alerted");
       onSaved();
     } finally { setBusy(false); }
