@@ -15,7 +15,7 @@ type Row = { id: string; created_at: string; [k: string]: unknown };
 
 function AdminPage() {
   const { user, loading } = useAuth();
-  const [tab, setTab] = useState<"animals"|"lost"|"wildlife"|"emergency"|"ai">("animals");
+  const [tab, setTab] = useState<"animals"|"lost"|"wildlife"|"emergency"|"ai"|"errors">("animals");
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -27,6 +27,7 @@ function AdminPage() {
       tab === "lost" ? supabase.from("lost_reports").select("*") :
       tab === "wildlife" ? supabase.from("wildlife_alerts").select("*") :
       tab === "emergency" ? supabase.from("emergency_reports").select("*") :
+      tab === "errors" ? supabase.from("ai_errors").select("*") :
       supabase.from("ai_analyses").select("*");
     q.order("created_at", { ascending: false }).limit(50)
       .then(({ data }) => { setRows(((data as unknown) as Row[]) ?? []); setBusy(false); });
@@ -52,10 +53,13 @@ function AdminPage() {
         <FadeIn>
           <GlassCard>
             <div className="flex flex-wrap gap-1 border-b border-white/10 pb-2">
-              {(["animals","lost","wildlife","emergency","ai"] as const).map((k) => (
-                <button key={k} onClick={() => setTab(k)} className={`rounded-md px-3 py-1.5 text-xs uppercase tracking-widest ${tab===k ? "bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)]" : "text-muted-foreground hover:text-foreground"}`}>{k}</button>
+              {(["animals","lost","wildlife","emergency","ai","errors"] as const).map((k) => (
+                <button key={k} onClick={() => setTab(k)} className={`rounded-md px-3 py-1.5 text-xs uppercase tracking-widest ${tab===k ? "bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)]" : "text-muted-foreground hover:text-foreground"}`}>{k === "errors" ? "AI failures" : k}</button>
               ))}
             </div>
+            {tab === "errors" && (
+              <p className="mt-2 text-[11px] text-muted-foreground">Recent /api/chat and /api/analyze failures. Visible only to admins (RLS-enforced).</p>
+            )}
             <div className="mt-3 max-h-[60vh] overflow-auto rounded-md border border-white/10">
               {busy ? <div className="p-6 text-center text-sm text-muted-foreground">Loading…</div> : rows.length === 0 ? <div className="p-6 text-center text-sm text-muted-foreground">No records.</div> : (
                 <table className="w-full text-left text-xs">
