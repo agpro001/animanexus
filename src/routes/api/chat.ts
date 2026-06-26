@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
 
 const SYSTEM = `You are the ANIMA Nexus Assistant — a warm, expert AI guardian inside a futuristic animal protection platform.
 
@@ -32,6 +33,20 @@ export const Route = createFileRoute("/api/chat")({
             });
           } catch (e) { console.error("[chat] failed to log error", e); }
         };
+        const ip = clientIp(request);
+        const rl = rateLimit(`chat:${ip}`, 20, 60_000);
+        if (!rl.ok) {
+          await logError(429, `rate_limited ip=${ip}`);
+          return new Response(JSON.stringify({ error: "rate_limited", retryAfter: rl.resetSeconds, requestId }), {
+            status: 429,
+            headers: {
+              "content-type": "application/json",
+              "x-request-id": requestId,
+              "retry-after": String(rl.resetSeconds),
+              ...rateLimitHeaders(rl),
+            },
+          });
+        }
         try {
           const body = (await request.json().catch(() => null)) as { messages?: UIMessage[] } | null;
           if (!body || !Array.isArray(body.messages)) {
@@ -60,6 +75,7 @@ export const Route = createFileRoute("/api/chat")({
           });
           const response = result.toUIMessageStreamResponse({ originalMessages: messages });
           response.headers.set("x-request-id", requestId);
+          for (const [k, v] of Object.entries(rateLimitHeaders(rl))) response.headers.set(k, v);
           return response;
         } catch (err) {
           const msg = err instanceof Error ? err.message : String(err);
