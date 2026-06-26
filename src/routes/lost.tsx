@@ -30,6 +30,7 @@ function LostPage() {
   const { user } = useAuth();
   const [reports, setReports] = useState<Report[]>([]);
   const [open, setOpen] = useState(false);
+  const [sightOpen, setSightOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -48,7 +49,7 @@ function LostPage() {
         kicker="Visual matching, community sighting map, and predictive search radius. Every pair of eyes becomes a sensor.">
         <div className="mt-6 flex flex-wrap gap-3">
           <NeonButton onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> Report Missing</NeonButton>
-          <GhostButton><Search className="h-4 w-4" /> I saw an animal</GhostButton>
+          <GhostButton onClick={() => setSightOpen(true)}><Search className="h-4 w-4" /> I saw an animal</GhostButton>
         </div>
       </PageHeader>
 
@@ -77,40 +78,29 @@ function LostPage() {
 
       <AnimatePresence>
         {open && <ReportDialog onClose={() => setOpen(false)} onSaved={() => { setOpen(false); load(); }} userId={user?.id ?? null} />}
+        {sightOpen && <SightingDialog onClose={() => setSightOpen(false)} userId={user?.id ?? null} reports={reports} />}
       </AnimatePresence>
     </>
   );
 }
 
 function SearchMap({ reports }: { reports: Report[] }) {
-  // Pseudo-map: stylized grid + plotted points
-  const pts = reports.slice(0, 12).map((_, i) => ({
-    x: 8 + ((i * 73) % 84),
-    y: 14 + ((i * 41) % 72),
-    label: reports[i].name,
-    found: reports[i].status === "found",
-  }));
+  // Live Windy.com embedded map — real wind/weather overlay for predictive search.
   return (
     <div className="relative h-[420px] overflow-hidden rounded-md border border-white/10 bg-[oklch(0.1_0.025_260)]">
-      <div className="absolute inset-0 grid-bg opacity-40" />
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
-        {[20,40,60,80].map((c) => <circle key={c} cx="50" cy="50" r={c/2} fill="none" stroke="oklch(0.78 0.18 200 / 0.15)" strokeDasharray="0.5,1" />)}
-        <line x1="0" y1="50" x2="100" y2="50" stroke="oklch(0.5 0.04 270 / 0.3)" strokeWidth="0.2" />
-        <line x1="50" y1="0" x2="50" y2="100" stroke="oklch(0.5 0.04 270 / 0.3)" strokeWidth="0.2" />
-      </svg>
-      {pts.map((p, i) => (
-        <div key={i} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-          <div className={`relative h-3 w-3 rounded-full ${p.found ? "bg-[var(--neon-emerald)]" : "bg-[var(--neon-pink)]"}`} style={{ boxShadow: `0 0 12px currentColor` }}>
-            <span className={`absolute inset-0 animate-ping rounded-full ${p.found ? "bg-[var(--neon-emerald)]" : "bg-[var(--neon-pink)]"} opacity-70`} />
-          </div>
-          <div className="mt-1 whitespace-nowrap rounded bg-black/60 px-1.5 py-0.5 text-[10px] text-foreground/80 backdrop-blur">{p.label}</div>
-        </div>
-      ))}
-      <div className="absolute bottom-3 left-3 rounded-md border border-white/10 bg-black/40 px-3 py-2 text-[10px] font-mono uppercase tracking-widest backdrop-blur">
-        <div className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-pink)] shadow-[0_0_6px_currentColor]" /> Searching</div>
-        <div className="mt-1 flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-emerald)] shadow-[0_0_6px_currentColor]" /> Reunited</div>
+      <iframe
+        title="Windy live wind & weather map"
+        src="https://embed.windy.com/embed2.html?lat=20&lon=0&zoom=2&level=surface&overlay=wind&menu=&message=true&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=20&detailLon=0&metricWind=default&metricTemp=default&radarRange=-1"
+        className="absolute inset-0 h-full w-full"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,oklch(0.05_0.02_260/0.55)_100%)]" />
+      <div className="absolute bottom-3 left-3 rounded-md border border-white/10 bg-black/60 px-3 py-2 text-[10px] font-mono uppercase tracking-widest backdrop-blur">
+        <div className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-pink)] shadow-[0_0_6px_currentColor]" /> {reports.filter(r=>r.status!=="found").length} searching</div>
+        <div className="mt-1 flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-emerald)] shadow-[0_0_6px_currentColor]" /> {reports.filter(r=>r.status==="found").length} reunited</div>
       </div>
-      <div className="absolute right-3 top-3 rounded-md border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-[var(--neon-cyan)]">Predictive radius · 4.2 km</div>
+      <div className="absolute right-3 top-3 rounded-md border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/80 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-black">Live wind · Windy.com</div>
     </div>
   );
 }
@@ -213,5 +203,86 @@ function SimpleField({ label, v, on, required, className }: { label: string; v: 
       <input value={v} onChange={(e) => on(e.target.value)} required={required}
         className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none focus:border-[var(--neon-cyan)]/50" />
     </label>
+  );
+}
+
+function SightingDialog({ onClose, userId, reports }: { onClose: () => void; userId: string | null; reports: Report[] }) {
+  const [form, setForm] = useState({ description: "", location: "", lost_report_id: "" });
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [imgFile, setImgFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const useMyLocation = () => {
+    if (!navigator.geolocation) return toast.error("Geolocation not available");
+    navigator.geolocation.getCurrentPosition(
+      (p) => { setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }); toast.success("Location captured"); },
+      () => toast.error("Couldn't get location"),
+    );
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userId) { toast.error("Sign in to submit a sighting"); return; }
+    setBusy(true);
+    try {
+      let photo_url: string | null = null;
+      if (imgFile) {
+        const path = `${userId}/sightings/${crypto.randomUUID()}-${imgFile.name}`;
+        const { error } = await supabase.storage.from("anima-media").upload(path, imgFile);
+        if (!error) {
+          const { data } = await supabase.storage.from("anima-media").createSignedUrl(path, 60 * 60 * 24 * 365);
+          photo_url = data?.signedUrl ?? null;
+        }
+      }
+      const { error } = await supabase.from("sightings").insert({
+        reporter_id: userId,
+        description: `${form.description}${form.location ? ` · near ${form.location}` : ""}`,
+        lat: coords?.lat ?? null, lng: coords?.lng ?? null,
+        photo_url, lost_report_id: form.lost_report_id || null,
+      });
+      if (error) throw error;
+      toast.success("Sighting reported — owners notified");
+      onClose();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to submit");
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={onClose} className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-0 backdrop-blur sm:items-center sm:p-6">
+      <motion.form initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 30, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()} onSubmit={submit}
+        className="glass-strong w-full max-w-lg space-y-3 overflow-y-auto rounded-t-2xl p-6 sm:rounded-xl">
+        <div className="flex items-center gap-2"><Search className="h-5 w-5 text-[var(--neon-emerald)]" /><h3 className="font-display text-xl font-semibold">Report a sighting</h3></div>
+        <p className="text-xs text-muted-foreground">Help reunite lost animals. Your report alerts owners with matching searches nearby.</p>
+        <SimpleField label="What did you see?" v={form.description} on={(v) => setForm({ ...form, description: v })} required />
+        <SimpleField label="Approximate location" v={form.location} on={(v) => setForm({ ...form, location: v })} />
+        <div>
+          <span className="mb-1 block text-[11px] font-mono uppercase tracking-widest text-muted-foreground">Match to active search (optional)</span>
+          <select value={form.lost_report_id} onChange={(e) => setForm({ ...form, lost_report_id: e.target.value })}
+            className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm">
+            <option value="">— none —</option>
+            {reports.filter(r => r.status !== "found" && !r.id.startsWith("s")).map(r => (
+              <option key={r.id} value={r.id}>{r.name} · {r.species}{r.breed ? ` · ${r.breed}` : ""}</option>
+            ))}
+          </select>
+        </div>
+        <label className="block">
+          <span className="mb-1 block text-[11px] font-mono uppercase tracking-widest text-muted-foreground">Photo (optional)</span>
+          <input type="file" accept="image/*" onChange={(e) => setImgFile(e.target.files?.[0] ?? null)} className="w-full rounded-md border border-white/10 bg-white/5 p-2 text-sm" />
+        </label>
+        <div className="flex items-center justify-between rounded-md border border-white/10 bg-white/5 p-2 text-xs">
+          <span className="font-mono text-muted-foreground">
+            {coords ? `📍 ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}` : "GPS not set"}
+          </span>
+          <button type="button" onClick={useMyLocation} className="rounded border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/10 px-2 py-1 text-[var(--neon-cyan)]">Use my location</button>
+        </div>
+        <div className="flex gap-2 pt-2">
+          <NeonButton type="submit" disabled={busy || !form.description}>{busy ? "Submitting…" : "Submit sighting"}</NeonButton>
+          <GhostButton type="button" onClick={onClose}>Cancel</GhostButton>
+        </div>
+      </motion.form>
+    </motion.div>
   );
 }

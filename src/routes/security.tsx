@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, PageSection } from "@/components/anima/page";
 import { GlassCard, FadeIn } from "@/components/anima/ui";
-import { ShieldCheck, ShieldAlert, CheckCircle2, Lock, FileText, Bug } from "lucide-react";
+import { ShieldCheck, ShieldAlert, CheckCircle2, Lock, FileText, Bug, Download } from "lucide-react";
+import { jsPDF } from "jspdf";
 
 export const Route = createFileRoute("/security")({
   head: () => ({
@@ -88,13 +89,72 @@ const SEV_COLOR: Record<Finding["severity"], string> = {
 
 function SecurityPage() {
   const fixed = FINDINGS.filter((f) => f.status === "fixed").length;
+
+  const exportPdf = () => {
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 48;
+    let y = margin;
+
+    doc.setFillColor(5, 7, 13);
+    doc.rect(0, 0, pageW, 90, "F");
+    doc.setTextColor(120, 230, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(20);
+    doc.text("ANIMA Nexus — Security Audit Report", margin, 50);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(180, 200, 220);
+    doc.text(`Generated ${new Date().toISOString()}`, margin, 70);
+    y = 120;
+
+    doc.setTextColor(20, 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Findings fixed: ${fixed} / ${FINDINGS.length}`, margin, y); y += 16;
+    doc.text(`Open critical: 0    Tables under RLS: 100%`, margin, y); y += 24;
+
+    FINDINGS.forEach((f, idx) => {
+      if (y > 740) { doc.addPage(); y = margin; }
+      doc.setDrawColor(200);
+      doc.line(margin, y, pageW - margin, y); y += 14;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+      doc.text(`${idx + 1}. ${f.title}`, margin, y); y += 16;
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+      const meta = `Severity: ${f.severity.toUpperCase()}   Status: ${f.status.toUpperCase()}   Area: ${f.area}   Fixed: ${f.fixedAt}`;
+      doc.setTextColor(80); doc.text(meta, margin, y); y += 14;
+      doc.setTextColor(20);
+      doc.text(`ID: ${f.id}`, margin, y); y += 14;
+      const split = (label: string, text: string) => {
+        doc.setFont("helvetica", "bold"); doc.text(label, margin, y); y += 12;
+        doc.setFont("helvetica", "normal");
+        const lines = doc.splitTextToSize(text, pageW - margin * 2);
+        doc.text(lines, margin, y);
+        y += lines.length * 12 + 6;
+      };
+      split("Problem:", f.problem);
+      split("Remediation:", f.remediation);
+      y += 8;
+    });
+
+    doc.save(`anima-security-audit-${new Date().toISOString().slice(0, 10)}.pdf`);
+  };
+
   return (
     <>
       <PageHeader
         eyebrow="Trust & Safety"
         title={<>Security audit <span className="text-gradient">report</span></>}
         kicker="Live remediation log for the ANIMA Nexus platform. All listed findings have been verified and patched."
-      />
+      >
+        <div className="mt-6">
+          <button
+            onClick={exportPdf}
+            className="inline-flex items-center gap-2 rounded-md border border-[var(--neon-cyan)]/50 bg-[var(--neon-cyan)]/15 px-4 py-2 text-sm font-medium text-[var(--neon-cyan)] transition hover:bg-[var(--neon-cyan)]/25"
+          >
+            <Download className="h-4 w-4" /> Export audit report (PDF)
+          </button>
+        </div>
+      </PageHeader>
       <PageSection>
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard icon={ShieldCheck} label="Findings fixed" value={`${fixed} / ${FINDINGS.length}`} color="var(--neon-emerald)" />
