@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
 
 const SYSTEM = `You are the ANIMA Nexus Assistant — a warm, expert AI guardian inside a futuristic animal protection platform.
@@ -56,14 +56,12 @@ export const Route = createFileRoute("/api/chat")({
             });
           }
           const messages = body.messages;
-          const key = process.env.LOVABLE_API_KEY;
-          if (!key) {
-            await logError(500, "Missing LOVABLE_API_KEY");
-            return new Response(JSON.stringify({ error: "AI gateway not configured", requestId }), {
-              status: 500, headers: { "content-type": "application/json", "x-request-id": requestId },
-            });
-          }
-          const gateway = createLovableAiGatewayProvider(key);
+          const gateway = createOpenAICompatible({
+            baseURL: "https://ai-gateway.vercel.sh/v1",
+            headers: {
+              authorization: `Bearer ${process.env.AI_GATEWAY_API_KEY || ""}`,
+            },
+          });
           const result = streamText({
             model: gateway(model),
             system: SYSTEM,
