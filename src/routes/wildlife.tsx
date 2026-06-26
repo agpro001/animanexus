@@ -149,8 +149,8 @@ function Heatmap({ points }: { points: LiveThreat[] }) {
   return (
     <div className="relative mt-3 h-64 overflow-hidden rounded-md border border-white/10 bg-[oklch(0.1_0.025_260)]">
       <iframe
-        title="Windy global threat overlay"
-        src="https://embed.windy.com/embed2.html?lat=20&lon=0&zoom=2&level=surface&overlay=temp&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1"
+        title="Windy temperature overlay"
+        src="https://embed.windy.com/embed2.html?lat=20&lon=0&zoom=2&level=surface&overlay=temp&product=ecmwf&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1"
         className="absolute inset-0 h-full w-full"
         loading="lazy"
         referrerPolicy="no-referrer"
