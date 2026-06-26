@@ -33,9 +33,12 @@ function EmergencyPage() {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [plan, setPlan] = useState<Plan | null>(null);
+  const [reportId, setReportId] = useState<string | null>(null);
+  const [savingReport, setSavingReport] = useState(false);
+  const [locating, setLocating] = useState(false);
 
   const trigger = async (s: typeof SCENARIOS[number]) => {
-    setActive(s); setPlan(null); setBusy(true);
+    setActive(s); setPlan(null); setBusy(true); setReportId(null);
     const r = await analyze<Plan>("emergency", {
       prompt: `Scenario: ${s.label}. Owner notes: ${notes || "none"}. Generate the immediate action plan.`,
     });
@@ -43,10 +46,58 @@ function EmergencyPage() {
     if (r.error) toast.error(r.error);
     if (r.result) {
       setPlan(r.result);
-      if (user) await supabase.from("emergency_reports").insert({
-        owner_id: user.id, scenario: s.label, severity: r.result.severity, notes, action_plan: r.result,
-      });
+      if (user) {
+        const { data } = await supabase.from("emergency_reports").insert({
+          owner_id: user.id, scenario: s.label, severity: r.result.severity, notes, action_plan: r.result,
+        }).select("id").single();
+        if (data?.id) setReportId(data.id);
+      }
     }
+  };
+
+  const findNearestHelp = () => {
+    setLocating(true);
+    if (!navigator.geolocation) {
+      window.open(`https://www.google.com/maps/search/emergency+veterinary+hospital`, "_blank");
+      setLocating(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        window.open(
+          `https://www.google.com/maps/search/emergency+veterinary+hospital/@${latitude},${longitude},14z`,
+          "_blank",
+        );
+        setLocating(false);
+      },
+      () => {
+        window.open(`https://www.google.com/maps/search/emergency+veterinary+hospital`, "_blank");
+        setLocating(false);
+        toast.message("Showing global vet search (location denied)");
+      },
+      { timeout: 6000 },
+    );
+  };
+
+  const saveReport = async () => {
+    if (!user) { toast.error("Sign in to save reports"); return; }
+    if (!active || !plan) return;
+    setSavingReport(true);
+    try {
+      if (reportId) {
+        toast.success("Report already saved to your account");
+      } else {
+        const { data, error } = await supabase.from("emergency_reports").insert({
+          owner_id: user.id, scenario: active.label, severity: plan.severity, notes, action_plan: plan,
+        }).select("id").single();
+        if (error) throw error;
+        if (data?.id) setReportId(data.id);
+        toast.success("Report saved");
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save");
+    } finally { setSavingReport(false); }
   };
 
   return (
@@ -122,8 +173,20 @@ function EmergencyPage() {
                           <p className="mt-1">{plan.then_call}</p>
                         </div>
                         <div className="flex gap-2">
-                          <NeonButton><MapPin className="h-4 w-4" /> Find nearest help</NeonButton>
-                          <GhostButton><Sparkles className="h-4 w-4" /> Save report</GhostButton>
+                          <NeonButton onClick={findNearestHelp} disabled={locating}>
+                            <MapPin className="h-4 w-4" /> {locating ? "Locating…" : "Find nearest help"}
+                          </NeonButton>
+                          <GhostButton onClick={saveReport} disabled={savingReport}>
+                            <Sparkles className="h-4 w-4" /> {reportId ? "Saved ✓" : savingReport ? "Saving…" : "Save report"}
+                          </GhostButton>
+                          {plan.then_call && (
+                            <a
+                              href={`tel:${plan.then_call.replace(/[^0-9+]/g, "") || ""}`}
+                              className="inline-flex items-center gap-1.5 rounded-md border border-[var(--neon-violet)]/40 bg-[var(--neon-violet)]/15 px-3 py-1.5 text-sm text-[var(--neon-violet)] hover:bg-[var(--neon-violet)]/25"
+                            >
+                              <Phone className="h-4 w-4" /> Call
+                            </a>
+                          )}
                         </div>
                       </div>
                     )}
