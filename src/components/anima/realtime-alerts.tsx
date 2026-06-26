@@ -63,13 +63,14 @@ export function RealtimeAlerts() {
         setCount((c) => c + 1);
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "emergency_reports" }, (p) => {
-        const r = p.new as { issue?: string; lat?: number; lng?: number };
+        const r = p.new as { scenario?: string; location?: string; severity?: string };
         const cur = prefRef.current;
         if (!cur.enabled) return;
-        if (cur.radiusKm > 0 && r.lat != null && r.lng != null) {
-          if (distKm({ lat: cur.lat, lng: cur.lng }, { lat: r.lat, lng: r.lng }) > cur.radiusKm) return;
-        }
-        toast("Emergency reported nearby", { description: r.issue ?? "Animal in distress", icon: "🚨" });
+        // emergency_reports has no lat/lng — show globally when enabled
+        toast(`Emergency · ${r.severity ?? "alert"}`, {
+          description: `${r.scenario ?? "Animal in distress"}${r.location ? ` · ${r.location}` : ""}`,
+          icon: "🚨",
+        });
         setCount((c) => c + 1);
       })
       .subscribe();
