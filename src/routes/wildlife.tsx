@@ -148,7 +148,14 @@ function Heatmap({ points }: { points: LiveThreat[] }) {
   const pts = points.slice(0, 40);
   return (
     <div className="relative mt-3 h-64 overflow-hidden rounded-md border border-white/10 bg-[oklch(0.1_0.025_260)]">
-      <div className="absolute inset-0 grid-bg opacity-30" />
+      <iframe
+        title="Windy global threat overlay"
+        src="https://embed.windy.com/embed2.html?lat=20&lon=0&zoom=2&level=surface&overlay=temp&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1"
+        className="absolute inset-0 h-full w-full"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,oklch(0.05_0.02_260/0.65)_100%)]" />
       {pts.length === 0 && (
         <div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Awaiting live signal…</div>
       )}
@@ -158,7 +165,7 @@ function Heatmap({ points }: { points: LiveThreat[] }) {
         const c = p.severity >= 5 ? "var(--neon-pink)" : p.severity >= 4 ? "var(--neon-amber)" : "var(--neon-cyan)";
         const size = 30 + p.severity * 14;
         return (
-          <div key={p.id} title={p.title} className="absolute -translate-x-1/2 -translate-y-1/2 rounded-full" style={{
+          <div key={p.id} title={p.title} className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full" style={{
             left: `${x}%`, top: `${y}%`,
             width: size, height: size,
             background: `radial-gradient(circle, ${c}66, transparent 70%)`,
@@ -166,6 +173,9 @@ function Heatmap({ points }: { points: LiveThreat[] }) {
           }} />
         );
       })}
+      <div className="absolute right-2 top-2 rounded border border-[var(--neon-cyan)]/40 bg-black/60 px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-[var(--neon-cyan)] backdrop-blur">
+        Windy.com · {pts.length} live events
+      </div>
     </div>
   );
 }
