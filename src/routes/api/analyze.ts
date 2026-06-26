@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { callLovableAI } from "@/lib/ai-gateway.server";
+import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
 
 type Kind = "health_photo" | "audio" | "symptom" | "twin_summary" | "emergency" | "shelter_match" | "wildlife";
 
@@ -50,6 +51,20 @@ export const Route = createFileRoute("/api/analyze")({
           new Response(JSON.stringify({ ...payload, requestId }), {
             status, headers: { "content-type": "application/json", "x-request-id": requestId },
           });
+        const ip = clientIp(request);
+        const rl = rateLimit(`analyze:${ip}`, 15, 60_000);
+        if (!rl.ok) {
+          await logError(429, null, `rate_limited ip=${ip}`);
+          return new Response(JSON.stringify({ error: "rate_limited", retryAfter: rl.resetSeconds, requestId }), {
+            status: 429,
+            headers: {
+              "content-type": "application/json",
+              "x-request-id": requestId,
+              "retry-after": String(rl.resetSeconds),
+              ...rateLimitHeaders(rl),
+            },
+          });
+        }
         let body: Body;
         try { body = (await request.json()) as Body; }
         catch {
