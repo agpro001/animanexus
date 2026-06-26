@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PageHeader, PageSection } from "@/components/anima/page";
 import { GlassCard, NeonButton, GhostButton, RiskBadge, StatRing, FadeIn, AnimatedCounter } from "@/components/anima/ui";
-import { PlayCircle, Activity, Brain, MapPin, Siren, ArrowRight, Sparkles } from "lucide-react";
+import { PlayCircle, Activity, Brain, MapPin, Siren, ArrowRight, Sparkles, Play, Pause, RotateCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/demo")({
@@ -19,18 +19,88 @@ const STEPS = [
 
 function DemoPage() {
   const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0); // 0..1 within current step
+  const STEP_MS = 6000;
+  const rafRef = useRef<number | null>(null);
+  const startRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (!playing) { if (rafRef.current) cancelAnimationFrame(rafRef.current); return; }
+    startRef.current = performance.now() - progress * STEP_MS;
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - startRef.current) / STEP_MS);
+      setProgress(p);
+      if (p >= 1) {
+        if (step >= STEPS.length - 1) { setPlaying(false); return; }
+        setStep((s) => s + 1);
+        setProgress(0);
+        startRef.current = performance.now();
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, step]);
+
+  const goto = (i: number) => { setStep(i); setProgress(0); };
+  const reset = () => { setStep(0); setProgress(0); setPlaying(false); };
+
   return (
     <>
       <PageHeader eyebrow="Live Demo · Story Mode" title={<>Ninety seconds inside <span className="text-gradient">a real save.</span></>}
         kicker="Follow Luna from healthy → flagged → lost → reunited — all through the ANIMA Nexus." />
       <PageSection>
+        {/* Animated progress timeline */}
+        <FadeIn>
+          <div className="mb-6 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <button onClick={() => setPlaying((p) => !p)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] text-[oklch(0.12_0.02_260)]">
+                  {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
+                </button>
+                <button onClick={reset} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-foreground/80">
+                  <RotateCw className="h-4 w-4" />
+                </button>
+                <div className="ml-2 leading-tight">
+                  <div className="font-display text-sm font-semibold">{STEPS[step].title}</div>
+                  <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">Step {step + 1} of {STEPS.length}</div>
+                </div>
+              </div>
+              <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--neon-cyan)]">
+                {playing ? "AUTO-PLAYING" : "PAUSED"}
+              </div>
+            </div>
+            <div className="relative mt-4 grid grid-cols-4 gap-2">
+              {STEPS.map((s, i) => {
+                const active = i === step;
+                const done = i < step;
+                const fill = done ? 1 : active ? progress : 0;
+                return (
+                  <button key={i} onClick={() => goto(i)} className="group text-left">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+                      <div className="h-full rounded-full bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] transition-[width] duration-150"
+                        style={{ width: `${fill * 100}%` }} />
+                    </div>
+                    <div className={`mt-1.5 flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest ${active ? "text-[var(--neon-cyan)]" : done ? "text-foreground/70" : "text-muted-foreground"}`}>
+                      <s.icon className="h-3 w-3" /> {s.title.split(" · ")[1] ?? s.title}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </FadeIn>
+
         <div className="grid gap-6 lg:grid-cols-[1fr_1.3fr]">
           <FadeIn>
             <GlassCard glow="cyan">
               <h3 className="flex items-center gap-2 font-display text-lg font-semibold"><PlayCircle className="h-5 w-5 text-[var(--neon-cyan)]" /> Story controls</h3>
               <div className="mt-4 space-y-2">
                 {STEPS.map((s, i) => (
-                  <button key={i} onClick={() => setStep(i)}
+                  <button key={i} onClick={() => goto(i)}
                     className={`flex w-full items-start gap-3 rounded-md border p-3 text-left transition ${step===i ? "border-[var(--neon-cyan)] bg-[var(--neon-cyan)]/10" : "border-white/10 bg-white/5 hover:border-white/20"}`}>
                     <div className="grid h-9 w-9 shrink-0 place-items-center rounded-md border border-white/10" style={{ background: `${s.color}20`, color: s.color }}><s.icon className="h-4 w-4" /></div>
                     <div>
@@ -41,8 +111,8 @@ function DemoPage() {
                 ))}
               </div>
               <div className="mt-4 flex gap-2">
-                <GhostButton onClick={() => setStep((s) => Math.max(0, s - 1))} disabled={step === 0}>Prev</GhostButton>
-                <NeonButton onClick={() => setStep((s) => Math.min(STEPS.length-1, s + 1))} disabled={step === STEPS.length-1}>Next <ArrowRight className="h-4 w-4" /></NeonButton>
+                <GhostButton onClick={() => goto(Math.max(0, step - 1))} disabled={step === 0}>Prev</GhostButton>
+                <NeonButton onClick={() => goto(Math.min(STEPS.length-1, step + 1))} disabled={step === STEPS.length-1}>Next <ArrowRight className="h-4 w-4" /></NeonButton>
               </div>
             </GlassCard>
           </FadeIn>
