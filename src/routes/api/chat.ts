@@ -15,6 +15,15 @@ Your job:
 
 Tone: futuristic but human; like a calm mission-control specialist who genuinely loves animals.`;
 
+function safeJsonParse<T>(value: string | null | undefined): T | undefined {
+  if (!value) return undefined;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return undefined;
+  }
+}
+
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
@@ -27,12 +36,19 @@ export const Route = createFileRoute("/api/chat")({
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
             await supabaseAdmin.from("ai_errors").insert({
-              request_id: requestId, route: "/api/chat", status, model, kind: "chat",
+              request_id: requestId,
+              route: "/api/chat",
+              status,
+              model,
+              kind: "chat",
               error_message: error_message.slice(0, 2000),
-              meta: meta ? (JSON.parse(JSON.stringify(meta)) as never) : null,
+              meta: meta ? (safeJsonParse<Record<string, unknown>>(JSON.stringify(meta)) ?? null) : null,
             });
-          } catch (e) { console.error("[chat] failed to log error", e); }
+          } catch (e) {
+            console.error("[chat] failed to log error", e);
+          }
         };
+
         const ip = clientIp(request);
         const rl = rateLimit(`chat:${ip}`, 20, 60_000);
         if (!rl.ok) {
@@ -47,23 +63,28 @@ export const Route = createFileRoute("/api/chat")({
             },
           });
         }
+
         try {
           const body = (await request.json().catch(() => null)) as { messages?: UIMessage[] } | null;
           if (!body || !Array.isArray(body.messages)) {
             await logError(400, "messages array required");
             return new Response(JSON.stringify({ error: "messages array required", requestId }), {
-              status: 400, headers: { "content-type": "application/json", "x-request-id": requestId },
+              status: 400,
+              headers: { "content-type": "application/json", "x-request-id": requestId },
             });
           }
+
           const messages = body.messages;
           const key = process.env.LOVABLE_API_KEY;
           if (!key) {
             await logError(500, "Missing LOVABLE_API_KEY");
             return new Response(JSON.stringify({ error: "AI gateway not configured", requestId }), {
-              status: 500, headers: { "content-type": "application/json", "x-request-id": requestId },
+              status: 500,
+              headers: { "content-type": "application/json", "x-request-id": requestId },
             });
           }
-          const gateway = createLovableAiGatewayProvider(key);
+
+          const gateway = createLovableAiGatewayProvider(key, request.headers.get("x-lovable-aig-run-id") ?? undefined);
           const result = streamText({
             model: gateway(model),
             system: SYSTEM,
@@ -73,8 +94,11 @@ export const Route = createFileRoute("/api/chat")({
               void logError(502, `stream error: ${msg}`);
             },
           });
+
           const response = result.toUIMessageStreamResponse({ originalMessages: messages });
           response.headers.set("x-request-id", requestId);
+          const runId = gateway.getRunId();
+          if (runId) response.headers.set("x-lovable-aig-run-id", runId);
           for (const [k, v] of Object.entries(rateLimitHeaders(rl))) response.headers.set(k, v);
           return response;
         } catch (err) {
@@ -82,7 +106,8 @@ export const Route = createFileRoute("/api/chat")({
           console.error("[chat] handler error", requestId, msg);
           await logError(500, msg);
           return new Response(JSON.stringify({ error: "Chat failure", requestId }), {
-            status: 500, headers: { "content-type": "application/json", "x-request-id": requestId },
+            status: 500,
+            headers: { "content-type": "application/json", "x-request-id": requestId },
           });
         }
       },
