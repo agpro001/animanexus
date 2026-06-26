@@ -2,7 +2,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, X, Send, Sparkles } from "lucide-react";
+import { MessageSquare, X, Send, Sparkles, Square, RotateCw, AlertTriangle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Logo } from "./logo";
 
@@ -16,11 +16,18 @@ const SUGGESTIONS = [
 export function ChatDock() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [errorState, setErrorState] = useState<{ kind: "rate" | "credits" | "generic"; message: string } | null>(null);
   const transportRef = useRef<DefaultChatTransport<UIMessage> | null>(null);
   if (!transportRef.current) transportRef.current = new DefaultChatTransport<UIMessage>({ api: "/api/chat" });
-  const { messages, sendMessage, status } = useChat<UIMessage>({
+  const { messages, sendMessage, status, stop, setMessages, regenerate } = useChat<UIMessage>({
     transport: transportRef.current!,
-    onError: (e) => console.error("chat error", e),
+    onError: (e) => {
+      console.error("chat error", e);
+      const msg = (e as Error)?.message ?? "";
+      if (/429|rate/i.test(msg)) setErrorState({ kind: "rate", message: "You're sending messages too quickly. Pause for a minute and try again." });
+      else if (/402|credit/i.test(msg)) setErrorState({ kind: "credits", message: "AI credits exhausted. Please top up in workspace billing." });
+      else setErrorState({ kind: "generic", message: msg || "Something went wrong. Tap retry." });
+    },
   });
   const isLoading = status === "submitted" || status === "streaming";
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -28,8 +35,21 @@ export function ChatDock() {
 
   const send = (text: string) => {
     if (!text.trim() || isLoading) return;
+    setErrorState(null);
     sendMessage({ text: text.trim() });
     setInput("");
+  };
+
+  const retry = () => {
+    setErrorState(null);
+    if (messages.length === 0) return;
+    // If last message is an empty/failed assistant, drop it before regenerating
+    const last = messages[messages.length - 1];
+    if (last.role === "assistant") {
+      const text = last.parts.map((p) => (p.type === "text" ? p.text : "")).join("");
+      if (!text.trim()) setMessages(messages.slice(0, -1));
+    }
+    regenerate();
   };
 
   return (
@@ -107,6 +127,27 @@ export function ChatDock() {
                   Thinking…
                 </div>
               )}
+              {errorState && (
+                <div className={`rounded-md border p-3 text-xs ${
+                  errorState.kind === "rate" ? "border-[var(--neon-amber)]/40 bg-[var(--neon-amber)]/10 text-[var(--neon-amber)]"
+                  : errorState.kind === "credits" ? "border-[var(--neon-pink)]/40 bg-[var(--neon-pink)]/10 text-[var(--neon-pink)]"
+                  : "border-[var(--neon-pink)]/40 bg-[var(--neon-pink)]/10 text-[var(--neon-pink)]"}`}>
+                  <div className="flex items-start gap-2">
+                    <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <div className="flex-1">
+                      <div className="font-mono uppercase tracking-widest text-[10px]">
+                        {errorState.kind === "rate" ? "Rate limit" : errorState.kind === "credits" ? "Credits exhausted" : "Stream error"}
+                      </div>
+                      <div className="mt-0.5">{errorState.message}</div>
+                      {errorState.kind !== "credits" && (
+                        <button onClick={retry} className="mt-2 inline-flex items-center gap-1 rounded border border-current/40 px-2 py-1 text-[10px] font-mono uppercase tracking-widest">
+                          <RotateCw className="h-3 w-3" /> Retry
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex items-end gap-2 border-t border-white/10 p-3">
@@ -118,10 +159,19 @@ export function ChatDock() {
                 rows={1}
                 className="scrollbar-thin max-h-32 flex-1 resize-none rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-[var(--neon-cyan)]/50"
               />
-              <button type="submit" disabled={isLoading || !input.trim()}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] text-[oklch(0.12_0.02_260)] disabled:opacity-40">
-                <Send className="h-4 w-4" />
-              </button>
+              {isLoading ? (
+                <button type="button" onClick={() => stop()}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[var(--neon-pink)] text-black"
+                  aria-label="Stop generating">
+                  <Square className="h-4 w-4 fill-current" />
+                </button>
+              ) : (
+                <button type="submit" disabled={!input.trim()}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-violet)] text-[oklch(0.12_0.02_260)] disabled:opacity-40"
+                  aria-label="Send">
+                  <Send className="h-4 w-4" />
+                </button>
+              )}
             </form>
           </motion.div>
         )}
