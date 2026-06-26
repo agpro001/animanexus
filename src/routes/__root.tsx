@@ -21,6 +21,7 @@ import "@fontsource/jetbrains-mono/400.css";
 import { AuthProvider } from "@/lib/auth";
 import { Nav, Footer } from "@/components/anima/nav";
 import { ChatDock } from "@/components/anima/chatbot";
+import { RealtimeAlerts } from "@/components/anima/realtime-alerts";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -136,6 +137,7 @@ function RootComponent() {
           </main>
           <Footer />
           <ChatDock />
+          <RealtimeAlerts />
           <Toaster theme="dark" position="top-right" richColors closeButton />
         </div>
       </AuthProvider>

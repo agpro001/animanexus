@@ -85,22 +85,72 @@ function LostPage() {
 }
 
 function SearchMap({ reports }: { reports: Report[] }) {
-  // Live Windy.com embedded map — real wind/weather overlay for predictive search.
+  // Custom simulation map: animated grid, pulsing search radii, plotted reports.
+  // Hash report addresses to stable pseudo coordinates so reports stay in place.
+  const hashPos = (s: string) => {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    const x = 8 + ((h >>> 0) % 84);
+    const y = 12 + (((h >>> 8) >>> 0) % 76);
+    return { x, y };
+  };
+  const plotted = reports.map((r) => ({ r, ...hashPos(r.id + (r.last_seen_address ?? r.name)) }));
   return (
-    <div className="relative h-[420px] overflow-hidden rounded-md border border-white/10 bg-[oklch(0.1_0.025_260)]">
-      <iframe
-        title="Windy live wind & weather map"
-        src="https://embed.windy.com/embed2.html?lat=20&lon=0&zoom=2&level=surface&overlay=wind&menu=&message=true&marker=&calendar=&pressure=&type=map&location=coordinates&detail=&detailLat=20&detailLon=0&metricWind=default&metricTemp=default&radarRange=-1"
-        className="absolute inset-0 h-full w-full"
-        loading="lazy"
-        referrerPolicy="no-referrer"
-      />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_30%,oklch(0.05_0.02_260/0.55)_100%)]" />
+    <div className="relative h-[420px] overflow-hidden rounded-md border border-white/10 bg-[radial-gradient(ellipse_at_top,oklch(0.16_0.06_270),oklch(0.07_0.025_265))]">
+      {/* animated grid */}
+      <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+        <defs>
+          <pattern id="grid" width="5" height="5" patternUnits="userSpaceOnUse">
+            <path d="M5 0L0 0 0 5" fill="none" stroke="oklch(0.55_0.18_200/0.18)" strokeWidth="0.1" />
+          </pattern>
+          <radialGradient id="scan" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="oklch(0.78_0.18_200/0.45)" />
+            <stop offset="60%" stopColor="oklch(0.78_0.18_200/0.08)" />
+            <stop offset="100%" stopColor="transparent" />
+          </radialGradient>
+        </defs>
+        <rect width="100" height="100" fill="url(#grid)" />
+        {/* sweeping scanner */}
+        <circle cx="50" cy="50" r="0" fill="url(#scan)">
+          <animate attributeName="r" values="0;60" dur="3.5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.7;0" dur="3.5s" repeatCount="indefinite" />
+        </circle>
+        {/* continent silhouettes — abstract neon blobs */}
+        {[[15,30,18,12],[42,28,22,14],[70,32,16,12],[24,62,18,12],[55,68,20,14],[80,70,12,10]].map(([cx,cy,rx,ry],i)=>(
+          <ellipse key={i} cx={cx} cy={cy} rx={rx} ry={ry} fill="oklch(0.22_0.08_265/0.55)" stroke="oklch(0.78_0.18_200/0.25)" strokeWidth="0.15" />
+        ))}
+      </svg>
+
+      {/* plotted reports */}
+      {plotted.map(({ r, x, y }) => {
+        const found = r.status === "found";
+        const c = found ? "var(--neon-emerald)" : "var(--neon-pink)";
+        return (
+          <div key={r.id} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: `${x}%`, top: `${y}%` }}>
+            <div className="relative">
+              {!found && (
+                <span className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 animate-ping rounded-full" style={{ background: `${c}`, opacity: 0.25 }} />
+              )}
+              <span className="block h-3 w-3 rounded-full ring-2 ring-black/40" style={{ background: c, boxShadow: `0 0 14px ${c}` }} />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 whitespace-nowrap rounded border border-white/10 bg-black/70 px-1.5 py-0.5 text-[9px] font-mono uppercase tracking-widest text-foreground/90 backdrop-blur">
+                {r.name}
+              </div>
+            </div>
+          </div>
+        );
+      })}
+
+      {/* HUD overlays */}
       <div className="absolute bottom-3 left-3 rounded-md border border-white/10 bg-black/60 px-3 py-2 text-[10px] font-mono uppercase tracking-widest backdrop-blur">
         <div className="flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-pink)] shadow-[0_0_6px_currentColor]" /> {reports.filter(r=>r.status!=="found").length} searching</div>
         <div className="mt-1 flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-emerald)] shadow-[0_0_6px_currentColor]" /> {reports.filter(r=>r.status==="found").length} reunited</div>
       </div>
-      <div className="absolute right-3 top-3 rounded-md border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/80 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-black">Live wind · Windy.com</div>
+      <div className="absolute right-3 top-3 rounded-md border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/80 px-3 py-1.5 text-[10px] font-mono uppercase tracking-widest text-black">
+        Sim Field · ANIMA Grid
+      </div>
+      <div className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-md border border-white/10 bg-black/60 px-2.5 py-1.5 text-[10px] font-mono uppercase tracking-widest backdrop-blur">
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--neon-cyan)]" /> Scanning
+      </div>
     </div>
   );
 }
