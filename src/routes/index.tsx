@@ -117,7 +117,7 @@ function Hero() {
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }}
             className="mt-5 max-w-xl text-base text-muted-foreground sm:text-lg">
-            One intelligent ecosystem to protect pets, shelter animals, livestock, and wildlife. Real-time twins, predictive health, lost-pet recovery, conservation maps, and instant emergency response — all powered by Lovable AI.
+            One intelligent ecosystem to protect pets, shelter animals, livestock, and wildlife. Real-time twins, predictive health, lost-pet recovery, conservation maps, and instant emergency response — all powered by advanced AI.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.25 }}
             className="mt-8 flex flex-wrap items-center gap-3">

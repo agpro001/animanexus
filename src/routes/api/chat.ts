@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
-import { createHash } from "crypto";
-import { createLovableAiGatewayProvider } from "@/lib/ai-gateway.server";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
 
 const SYSTEM = `You are the ANIMA Nexus Assistant — a warm, expert AI guardian inside a futuristic animal protection platform.
@@ -15,64 +14,6 @@ Your job:
 - Never claim to replace a veterinarian or wildlife expert. Always recommend professional help for serious concerns.
 
 Tone: futuristic but human; like a calm mission-control specialist who genuinely loves animals.`;
-
-const CACHE_SCHEMA_VERSION = "v1";
-
-function normalizePrompt(text: string): string {
-  return text.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
-function hashPrompt(text: string): string {
-  return createHash("sha256").update(`${CACHE_SCHEMA_VERSION}:${normalizePrompt(text)}`).digest("hex");
-}
-
-function extractText(parts: unknown): string {
-  if (!Array.isArray(parts)) return "";
-  return parts
-    .map((p) => (p && typeof p === "object" && (p as { type?: string }).type === "text" ? (p as { text?: string }).text ?? "" : ""))
-    .join("");
-}
-
-// Build a minimal AI SDK UI message stream from a cached string.
-// Emits start, text-start, text-delta, text-end, finish events compatible with useChat.
-function cachedUIMessageStream(text: string): Response {
-  const encoder = new TextEncoder();
-  const messageId = `cache_${Date.now().toString(36)}`;
-  const textId = `t_${Math.random().toString(36).slice(2, 8)}`;
-  const events: Array<Record<string, unknown>> = [
-    { type: "start", messageId },
-    { type: "text-start", id: textId },
-  ];
-  // Chunk into small slices for a streaming feel
-  const chunkSize = 24;
-  for (let i = 0; i < text.length; i += chunkSize) {
-    events.push({ type: "text-delta", id: textId, delta: text.slice(i, i + chunkSize) });
-  }
-  events.push({ type: "text-end", id: textId });
-  events.push({ type: "finish" });
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      for (const ev of events) {
-        controller.enqueue(encoder.encode(`data: ${JSON.stringify(ev)}\n\n`));
-        // tiny await so the client renders progressively
-        await new Promise((r) => setTimeout(r, 8));
-      }
-      controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
-      controller.close();
-    },
-  });
-
-  return new Response(stream, {
-    status: 200,
-    headers: {
-      "content-type": "text/event-stream; charset=utf-8",
-      "cache-control": "no-cache, no-transform",
-      "x-vercel-ai-ui-message-stream": "v1",
-      "x-anima-cache": "hit",
-    },
-  });
-}
 
 export const Route = createFileRoute("/api/chat")({
   server: {
@@ -125,52 +66,12 @@ export const Route = createFileRoute("/api/chat")({
           }
 
           const messages = body.messages;
-          const key = process.env.LOVABLE_API_KEY;
-          if (!key) {
-            await logError(500, "Missing LOVABLE_API_KEY");
-            return new Response(JSON.stringify({
-              error: "ai_not_configured",
-              message: "LOVABLE_API_KEY is not set on this server. If you deployed to Vercel, add it under Project Settings → Environment Variables and redeploy. The key is auto-provisioned on Lovable but not on external hosts.",
-              requestId,
-            }), {
-              status: 500,
-              headers: { "content-type": "application/json", "x-request-id": requestId },
-            });
-          }
-
-          // ---- Single-turn cache lookup ----
-          // Only cache when there is exactly one user message (a fresh question with no prior context).
-          const userMessages = messages.filter((m) => m.role === "user");
-          const isSingleTurn = userMessages.length === 1 && messages.length <= 2;
-          const lastUserText = extractText(userMessages[userMessages.length - 1]?.parts);
-          const cacheKey = isSingleTurn && lastUserText.trim().length > 0 ? hashPrompt(lastUserText) : null;
-
-          if (cacheKey) {
-            try {
-              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-              const { data: cached } = await supabaseAdmin
-                .from("chat_cache")
-                .select("response_text, hit_count")
-                .eq("prompt_hash", cacheKey)
-                .maybeSingle();
-              if (cached?.response_text) {
-                // best-effort hit_count bump
-                void supabaseAdmin
-                  .from("chat_cache")
-                  .update({ hit_count: (cached.hit_count ?? 1) + 1 })
-                  .eq("prompt_hash", cacheKey);
-                const res = cachedUIMessageStream(cached.response_text);
-                res.headers.set("x-request-id", requestId);
-                for (const [k, v] of Object.entries(rateLimitHeaders(rl))) res.headers.set(k, v);
-                return res;
-              }
-            } catch (e) {
-              console.warn("[chat] cache lookup failed", e);
-            }
-          }
-
-          const gateway = createLovableAiGatewayProvider(key, request.headers.get("x-lovable-aig-run-id") ?? undefined);
-          let fullText = "";
+          const gateway = createOpenAICompatible({
+            baseURL: "https://api.groq.com/openai/v1",
+            headers: {
+              authorization: `Bearer ${process.env.GROQ_API_KEY || ""}`,
+            },
+          });
           const result = streamText({
             model: gateway(model),
             system: SYSTEM,
@@ -179,33 +80,11 @@ export const Route = createFileRoute("/api/chat")({
               const msg = error instanceof Error ? error.message : String(error);
               void logError(502, `stream error: ${msg}`);
             },
-            onChunk: ({ chunk }) => {
-              if (chunk.type === "text-delta") fullText += chunk.text;
-            },
-            onFinish: async () => {
-              if (!cacheKey || !fullText.trim()) return;
-              try {
-                const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-                await supabaseAdmin.from("chat_cache").upsert(
-                  {
-                    prompt_hash: cacheKey,
-                    prompt_preview: lastUserText.slice(0, 300),
-                    response_text: fullText,
-                    model,
-                  },
-                  { onConflict: "prompt_hash" },
-                );
-              } catch (e) {
-                console.warn("[chat] cache write failed", e);
-              }
-            },
+
           });
 
           const response = result.toUIMessageStreamResponse({ originalMessages: messages });
           response.headers.set("x-request-id", requestId);
-          response.headers.set("x-anima-cache", "miss");
-          const runId = gateway.getRunId();
-          if (runId) response.headers.set("x-lovable-aig-run-id", runId);
           for (const [k, v] of Object.entries(rateLimitHeaders(rl))) response.headers.set(k, v);
           return response;
         } catch (err) {

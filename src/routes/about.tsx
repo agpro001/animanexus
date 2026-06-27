@@ -12,7 +12,7 @@ function AboutPage() {
   return (
     <>
       <PageHeader eyebrow="About" title={<>A digital guardian <span className="text-gradient">for every animal.</span></>}
-        kicker="ANIMA Nexus turns scattered animal data into a unified, intelligent ecosystem. Built on Lovable AI." />
+        kicker="ANIMA Nexus turns scattered animal data into a unified, intelligent ecosystem. Built with cutting-edge AI technology." />
       <PageSection>
         <div className="grid gap-6 lg:grid-cols-3">
           {[

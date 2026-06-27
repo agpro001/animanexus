@@ -85,13 +85,20 @@ export const Route = createFileRoute("/api/analyze")({
         if (userContent.length === 0) userContent.push({ type: "text", text: "Analyze this case." });
 
         try {
-          const r = await callLovableAI({
-            model,
-            messages: [
-              { role: "system", content: SYSTEMS[kind] },
-              { role: "user", content: userContent },
-            ],
-            response_format: { type: "json_object" },
+          const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${process.env.GROQ_API_KEY || ""}`,
+            },
+            body: JSON.stringify({
+              model,
+              messages: [
+                { role: "system", content: SYSTEMS[kind] },
+                { role: "user", content: userContent },
+              ],
+              response_format: { type: "json_object" },
+            }),
           });
           if (!r.ok) {
             const text = await r.text();

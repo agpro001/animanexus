@@ -10,7 +10,7 @@ export const Route = createFileRoute("/faq")({
 
 const QA: [string, string][] = [
   ["What is a digital animal twin?", "A continuously updated AI profile of an animal that aggregates health, behavior, activity, and risk signals — a living dashboard for that animal."],
-  ["How does the AI make predictions?", "We send photos, audio, symptoms, and structured details through Lovable AI gateway models. Outputs are always returned with confidence scores."],
+  ["How does the AI make predictions?", "We send photos, audio, symptoms, and structured details through advanced AI models. Outputs are always returned with confidence scores."],
   ["Is the platform for pets only?", "No — pets, shelter animals, livestock, service animals, and wildlife are all first-class."],
   ["Can shelters and conservation teams use it?", "Yes. Shelter intake + adopter matching and the wildlife guardian module are built in."],
   ["How accurate are the predictions?", "Every output carries a confidence score and reasoning. Never act on AI alone for critical decisions — always involve a vet, ranger, or expert."],

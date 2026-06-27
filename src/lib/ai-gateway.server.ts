@@ -38,14 +38,13 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, initialRun
 }
 
 export async function callLovableAI(body: unknown): Promise<Response> {
-  const key = process.env.LOVABLE_API_KEY;
-  if (!key) throw new Error("Missing LOVABLE_API_KEY");
-  return fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) throw new Error("Missing GROQ_API_KEY");
+  return fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Lovable-API-Key": key,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
+      "Authorization": `Bearer ${key}`,
     },
     body: JSON.stringify(body),
   });
