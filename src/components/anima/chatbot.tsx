@@ -82,7 +82,7 @@ export function ChatDock() {
               </div>
               <div className="leading-tight">
                 <div className="font-display text-sm font-semibold">ANIMA Assistant</div>
-                <div className="text-[10px] text-muted-foreground">Powered by Lovable AI · always learning</div>
+                <div className="text-[10px] text-muted-foreground">Powered by advanced AI · always learning</div>
               </div>
             </div>
 
