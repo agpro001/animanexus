@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, LogOut, User as UserIcon } from "lucide-react";
+import { Menu, X, LogOut, User as UserIcon, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { Logo } from "./logo";
 
@@ -50,9 +51,7 @@ export function Nav() {
               </button>
             </>
           ) : (
-            <Link to="/auth" className="rounded-md bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-1.5 text-sm font-medium text-[oklch(0.13_0.03_260)] shadow-[var(--shadow-glow-cyan)]">
-              <UserIcon className="mr-1 inline h-3.5 w-3.5" /> Sign in
-            </Link>
+            <SignInButton3D />
           )}
         </div>
         <button onClick={() => setOpen((o) => !o)} className="ml-auto rounded-md border border-white/10 bg-white/5 p-2 xl:hidden">
