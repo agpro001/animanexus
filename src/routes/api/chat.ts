@@ -80,7 +80,6 @@ export const Route = createFileRoute("/api/chat")({
               const msg = error instanceof Error ? error.message : String(error);
               void logError(502, `stream error: ${msg}`);
             },
-
           });
 
           const response = result.toUIMessageStreamResponse({ originalMessages: messages });
