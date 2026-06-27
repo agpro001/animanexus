@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { callLovableAI } from "@/lib/ai-gateway.server";
 import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
 
 type Kind = "health_photo" | "audio" | "symptom" | "twin_summary" | "emergency" | "shelter_match" | "wildlife";
@@ -36,7 +35,7 @@ export const Route = createFileRoute("/api/analyze")({
         const requestId =
           request.headers.get("x-request-id") ||
           (globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`);
-        const model = "google/gemini-3-flash-preview";
+        const model = "meta-llama/llama-4-scout-17b-16e-instruct";
         const logError = async (status: number, kind: string | null, error_message: string, meta?: Record<string, unknown>) => {
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

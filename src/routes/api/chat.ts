@@ -22,7 +22,7 @@ export const Route = createFileRoute("/api/chat")({
         const requestId =
           request.headers.get("x-request-id") ||
           (globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`);
-        const model = "google/gemini-3-flash-preview";
+        const model = "llama-3.3-70b-versatile";
         const logError = async (status: number, error_message: string, meta?: Record<string, unknown>) => {
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -80,7 +80,6 @@ export const Route = createFileRoute("/api/chat")({
               const msg = error instanceof Error ? error.message : String(error);
               void logError(502, `stream error: ${msg}`);
             },
-
           });
 
           const response = result.toUIMessageStreamResponse({ originalMessages: messages });
