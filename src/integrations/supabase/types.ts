@@ -204,6 +204,39 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_cache: {
+        Row: {
+          created_at: string
+          hit_count: number
+          id: string
+          model: string
+          prompt_hash: string
+          prompt_preview: string
+          response_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hit_count?: number
+          id?: string
+          model: string
+          prompt_hash: string
+          prompt_preview: string
+          response_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hit_count?: number
+          id?: string
+          model?: string
+          prompt_hash?: string
+          prompt_preview?: string
+          response_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contact_messages: {
         Row: {
           created_at: string

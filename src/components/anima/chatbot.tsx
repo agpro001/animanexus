@@ -26,6 +26,7 @@ export function ChatDock() {
       const msg = (e as Error)?.message ?? "";
       if (/429|rate/i.test(msg)) setErrorState({ kind: "rate", message: "You're sending messages too quickly. Pause for a minute and try again." });
       else if (/402|credit/i.test(msg)) setErrorState({ kind: "credits", message: "AI credits exhausted. Please top up in workspace billing." });
+      else if (/ai_not_configured|LOVABLE_API_KEY|AI gateway not configured/i.test(msg)) setErrorState({ kind: "generic", message: "AI is not configured on this host. If you deployed to Vercel, add LOVABLE_API_KEY in Project Settings → Environment Variables and redeploy. On Lovable preview this works automatically." });
       else setErrorState({ kind: "generic", message: msg || "Something went wrong. Tap retry." });
     },
   });

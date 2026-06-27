@@ -22,6 +22,7 @@ import { AuthProvider } from "@/lib/auth";
 import { Nav, Footer } from "@/components/anima/nav";
 import { ChatDock } from "@/components/anima/chatbot";
 import { RealtimeAlerts } from "@/components/anima/realtime-alerts";
+import { AppLoader } from "@/components/anima/app-loader";
 import { Toaster } from "sonner";
 
 function NotFoundComponent() {
@@ -131,6 +132,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <div className="relative flex min-h-screen flex-col">
+          <AppLoader />
           <Nav />
           <main className="flex-1">
             <Outlet />
