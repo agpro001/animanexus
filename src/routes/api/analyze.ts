@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { callLovableAI } from "@/lib/ai-gateway.server";
 import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
 
 type Kind = "health_photo" | "audio" | "symptom" | "twin_summary" | "emergency" | "shelter_match" | "wildlife";
