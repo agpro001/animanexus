@@ -57,9 +57,9 @@ export const Route = createFileRoute("/api/chat")({
           }
           const messages = body.messages;
           const gateway = createOpenAICompatible({
-            baseURL: "https://ai-gateway.vercel.sh/v1",
+            baseURL: "https://api.groq.com/openai/v1",
             headers: {
-              authorization: `Bearer ${process.env.AI_GATEWAY_API_KEY || ""}`,
+              authorization: `Bearer ${process.env.groq_api || ""}`,
             },
           });
           const result = streamText({
