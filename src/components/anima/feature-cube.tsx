@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { useRef, type MouseEvent } from "react";
 
@@ -19,6 +19,13 @@ export type FeatureCubeProps = {
  */
 export function FeatureCube({ to, label, icon: Icon, color, delay = 0, description }: FeatureCubeProps) {
   const ref = useRef<HTMLAnchorElement>(null);
+  const mx = useMotionValue(0.5);
+  const my = useMotionValue(0.5);
+  const sx = useSpring(mx, { stiffness: 180, damping: 18, mass: 0.4 });
+  const sy = useSpring(my, { stiffness: 180, damping: 18, mass: 0.4 });
+  const rotateY = useTransform(sx, (v) => (v - 0.5) * 28);
+  const rotateX = useTransform(sy, (v) => (0.5 - v) * 24);
+  const iconZ = useTransform(sx, () => 56);
 
   const handleMove = (e: MouseEvent<HTMLAnchorElement>) => {
     const el = ref.current;
@@ -26,30 +33,25 @@ export function FeatureCube({ to, label, icon: Icon, color, delay = 0, descripti
     const r = el.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
-    const rx = (0.5 - py) * 28;
-    const ry = (px - 0.5) * 32;
-    el.style.setProperty("--rx", `${rx}deg`);
-    el.style.setProperty("--ry", `${ry}deg`);
+    mx.set(px); my.set(py);
     el.style.setProperty("--mx", `${px * 100}%`);
     el.style.setProperty("--my", `${py * 100}%`);
   };
   const handleLeave = () => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.setProperty("--rx", `0deg`);
-    el.style.setProperty("--ry", `0deg`);
+    mx.set(0.5); my.set(0.5);
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 28, rotateX: -25, scale: 0.92 }}
+      initial={{ opacity: 0, y: 36, rotateX: -22, scale: 0.9 }}
       whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }}
-      whileHover={{ scale: 1.04, y: -4 }}
+      whileHover={{ scale: 1.05, y: -6 }}
       whileTap={{ scale: 0.97 }}
       viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
-      style={{ perspective: 1100 }}
+      transition={{ type: "spring", stiffness: 120, damping: 16, delay }}
+      style={{ perspective: 1200 }}
     >
+      <motion.div style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}>
       <Link
         ref={ref}
         to={to as never}
@@ -77,16 +79,16 @@ export function FeatureCube({ to, label, icon: Icon, color, delay = 0, descripti
             }}
           />
           {/* floating icon */}
-          <div
+          <motion.div
             className="absolute left-1/2 top-[38%] flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-2xl border border-white/15 transition-transform duration-300 ease-out group-hover:scale-110"
             style={{
               background: `color-mix(in oklab, ${color} 28%, oklch(0.15 0.03 260))`,
-              transform: "translate(-50%,-50%) translateZ(48px)",
+              translateZ: iconZ,
               boxShadow: `0 0 26px ${color}, inset 0 0 18px color-mix(in oklab, ${color} 45%, transparent)`,
             }}
           >
             <Icon className="h-9 w-9" style={{ color }} />
-          </div>
+          </motion.div>
           {/* label + description */}
           <div
             className="absolute inset-x-2 bottom-2 rounded-lg border border-white/10 bg-black/40 px-2.5 py-2 text-center"
@@ -104,6 +106,7 @@ export function FeatureCube({ to, label, icon: Icon, color, delay = 0, descripti
           <span className="pointer-events-none absolute right-2 bottom-2 h-2.5 w-2.5 border-b border-r" style={{ borderColor: color }} />
         </div>
       </Link>
+      </motion.div>
     </motion.div>
   );
 }

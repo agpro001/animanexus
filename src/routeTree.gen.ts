@@ -27,6 +27,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiWildlifeFeedRouteImport } from './routes/api/wildlife-feed'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiAnalyzeRouteImport } from './routes/api/analyze'
 
@@ -120,6 +121,11 @@ const ApiWildlifeFeedRoute = ApiWildlifeFeedRouteImport.update({
   path: '/api/wildlife-feed',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/wildlife': typeof WildlifeRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
 }
 export interface FileRoutesByTo {
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/wildlife': typeof WildlifeRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
 }
 export interface FileRoutesById {
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/wildlife': typeof WildlifeRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
+  '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
 }
 export interface FileRouteTypes {
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/wildlife'
     | '/api/analyze'
     | '/api/chat'
+    | '/api/health'
     | '/api/wildlife-feed'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/wildlife'
     | '/api/analyze'
     | '/api/chat'
+    | '/api/health'
     | '/api/wildlife-feed'
   id:
     | '__root__'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/wildlife'
     | '/api/analyze'
     | '/api/chat'
+    | '/api/health'
     | '/api/wildlife-feed'
   fileRoutesById: FileRoutesById
 }
@@ -287,6 +299,7 @@ export interface RootRouteChildren {
   WildlifeRoute: typeof WildlifeRoute
   ApiAnalyzeRoute: typeof ApiAnalyzeRoute
   ApiChatRoute: typeof ApiChatRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ApiWildlifeFeedRoute: typeof ApiWildlifeFeedRoute
 }
 
@@ -418,6 +431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiWildlifeFeedRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -455,18 +475,9 @@ const rootRouteChildren: RootRouteChildren = {
   WildlifeRoute: WildlifeRoute,
   ApiAnalyzeRoute: ApiAnalyzeRoute,
   ApiChatRoute: ApiChatRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ApiWildlifeFeedRoute: ApiWildlifeFeedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

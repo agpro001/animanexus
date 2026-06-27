@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, LogOut, User as UserIcon } from "lucide-react";
+import { Menu, X, LogOut, User as UserIcon, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/lib/auth";
 import { Logo } from "./logo";
 
@@ -50,9 +51,7 @@ export function Nav() {
               </button>
             </>
           ) : (
-            <Link to="/auth" className="rounded-md bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-1.5 text-sm font-medium text-[oklch(0.13_0.03_260)] shadow-[var(--shadow-glow-cyan)]">
-              <UserIcon className="mr-1 inline h-3.5 w-3.5" /> Sign in
-            </Link>
+            <SignInButton3D />
           )}
         </div>
         <button onClick={() => setOpen((o) => !o)} className="ml-auto rounded-md border border-white/10 bg-white/5 p-2 xl:hidden">
@@ -119,5 +118,37 @@ function FooterCol({ title, links }: { title: string; links: [string, string][] 
         ))}
       </ul>
     </div>
+  );
+}
+
+function SignInButton3D() {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.06, rotateX: -8, rotateY: 6 }}
+      whileTap={{ scale: 0.94, rotateX: 4 }}
+      transition={{ type: "spring", stiffness: 300, damping: 18 }}
+      style={{ perspective: 600, transformStyle: "preserve-3d" }}
+      className="relative"
+    >
+      <span
+        className="pointer-events-none absolute -inset-1 rounded-lg opacity-60 blur-md"
+        style={{ background: "linear-gradient(90deg,var(--neon-cyan),var(--neon-violet))" }}
+      />
+      <Link
+        to="/auth"
+        className="relative inline-flex items-center gap-1.5 overflow-hidden rounded-md bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-violet)] px-4 py-1.5 text-sm font-semibold text-[oklch(0.13_0.03_260)] shadow-[0_8px_24px_-6px_var(--neon-cyan)]"
+      >
+        <motion.span
+          aria-hidden
+          className="absolute inset-y-0 -left-1/2 w-1/3"
+          style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent)" }}
+          animate={{ left: ["-30%", "130%"] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <Sparkles className="h-3.5 w-3.5" />
+        <UserIcon className="h-3.5 w-3.5" />
+        Sign in
+      </Link>
+    </motion.div>
   );
 }

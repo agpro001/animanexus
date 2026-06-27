@@ -149,11 +149,12 @@ function Heatmap({ points }: { points: LiveThreat[] }) {
   return (
     <div className="relative mt-3 h-64 overflow-hidden rounded-md border border-white/10 bg-[oklch(0.1_0.025_260)]">
       <iframe
-        title="Windy temperature overlay"
-        src="https://embed.windy.com/embed2.html?lat=20&lon=0&zoom=2&level=surface&overlay=temp&product=ecmwf&menu=&message=&marker=&calendar=&pressure=&type=map&location=coordinates&metricWind=default&metricTemp=default&radarRange=-1"
+        title="Windy wind overlay"
+        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=mph&zoom=3&overlay=wind&product=ecmwf&level=surface&lat=6.49&lon=103.535&detailLat=21.795813892705674&detailLon=84.36776642176224&detail=true&pressure=true&message=true"
         className="absolute inset-0 h-full w-full"
         loading="lazy"
         referrerPolicy="no-referrer"
+        frameBorder={0}
       />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,oklch(0.05_0.02_260/0.65)_100%)]" />
       {pts.length === 0 && (
