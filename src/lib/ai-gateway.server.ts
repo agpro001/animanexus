@@ -38,8 +38,8 @@ export function createLovableAiGatewayProvider(lovableApiKey: string, initialRun
 }
 
 export async function callLovableAI(body: unknown): Promise<Response> {
-  const key = process.env.groq_api;
-  if (!key) throw new Error("Missing groq_api");
+  const key = process.env.GROQ_API_KEY;
+  if (!key) throw new Error("Missing GROQ_API_KEY");
   return fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {

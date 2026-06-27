@@ -59,7 +59,7 @@ export const Route = createFileRoute("/api/chat")({
           const gateway = createOpenAICompatible({
             baseURL: "https://api.groq.com/openai/v1",
             headers: {
-              authorization: `Bearer ${process.env.groq_api || ""}`,
+              authorization: `Bearer ${process.env.GROQ_API_KEY || ""}`,
             },
           });
           const result = streamText({

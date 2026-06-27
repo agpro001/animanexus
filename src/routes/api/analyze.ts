@@ -89,7 +89,7 @@ export const Route = createFileRoute("/api/analyze")({
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${process.env.groq_api || ""}`,
+              "Authorization": `Bearer ${process.env.GROQ_API_KEY || ""}`,
             },
             body: JSON.stringify({
               model,
