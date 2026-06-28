@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { PageHeader, PageSection } from "@/components/anima/page";
 import { GlassCard, FadeIn, NeonButton } from "@/components/anima/ui";
 import { Globe2, Flame, Droplet, AlertTriangle, Trees, Skull } from "lucide-react";
@@ -68,6 +69,33 @@ function WildlifePage() {
         kicker="Live habitat threats from NASA EONET and USGS, combined with on-platform poaching reports and AI severity scoring.">
         {user && <div className="mt-6"><NeonButton onClick={() => setReportOpen(true)}>Report a threat</NeonButton></div>}
       </PageHeader>
+
+      <PageSection className="pt-0">
+        <motion.div
+          initial={{ opacity: 0, y: 24, rotateX: -8 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          style={{ transformPerspective: 1200 }}
+        >
+          <GlassCard className="relative overflow-hidden p-0">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+              <motion.h3
+                initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}
+                className="flex items-center gap-2 font-display text-lg font-semibold">
+                <Globe2 className="h-5 w-5 text-[var(--neon-cyan)]" />
+                <span className="text-gradient">Live planetary threat heatmap</span>
+              </motion.h3>
+              <motion.span
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+                className="hidden rounded-full border border-[var(--neon-cyan)]/40 bg-black/40 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-[var(--neon-cyan)] sm:inline-flex">
+                Windy · ECMWF · {live.length} active
+              </motion.span>
+            </div>
+            <BigHeatmap points={live} />
+          </GlassCard>
+        </motion.div>
+      </PageSection>
+
       <PageSection>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-[var(--neon-emerald)]">
@@ -133,7 +161,11 @@ function WildlifePage() {
           </GlassCard>
 
           <GlassCard>
-            <h3 className="flex items-center gap-2 font-display text-lg font-semibold"><Globe2 className="h-5 w-5 text-[var(--neon-cyan)]" /> Live threat heatmap</h3>
+            <motion.h3
+              initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              className="flex items-center gap-2 font-display text-lg font-semibold">
+              <Globe2 className="h-5 w-5 text-[var(--neon-cyan)]" /> Compact heatmap
+            </motion.h3>
             <Heatmap points={live} />
           </GlassCard>
         </div>
@@ -141,6 +173,66 @@ function WildlifePage() {
 
       {reportOpen && user && <ReportForm onClose={() => setReportOpen(false)} onSaved={() => { setReportOpen(false); load(); }} userId={user.id} />}
     </>
+  );
+}
+
+function BigHeatmap({ points }: { points: LiveThreat[] }) {
+  const pts = points.slice(0, 60);
+  return (
+    <div className="relative h-[50vh] min-h-[420px] w-full overflow-hidden">
+      <iframe
+        title="Windy live heatmap"
+        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=mph&zoom=3&overlay=wind&product=ecmwf&level=surface&lat=6.49&lon=103.535&detailLat=21.795813892705674&detailLon=84.36776642176224&detail=true&pressure=true&message=true"
+        className="absolute inset-0 h-full w-full"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        frameBorder={0}
+      />
+      {/* cinematic vignette */}
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_55%,oklch(0.05_0.02_260/0.7)_100%)]" />
+      {/* animated scanlines */}
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 h-px bg-[var(--neon-cyan)]/60 shadow-[0_0_24px_var(--neon-cyan)]"
+        initial={{ top: "0%" }}
+        animate={{ top: ["0%", "100%", "0%"] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "linear" }}
+      />
+      {/* pulsing event markers */}
+      {pts.map((p, i) => {
+        const x = ((p.lon + 180) / 360) * 100;
+        const y = ((90 - p.lat) / 180) * 100;
+        const c = p.severity >= 5 ? "var(--neon-pink)" : p.severity >= 4 ? "var(--neon-amber)" : "var(--neon-cyan)";
+        const size = 32 + p.severity * 18;
+        return (
+          <motion.div
+            key={p.id}
+            title={p.title}
+            className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full"
+            style={{
+              left: `${x}%`, top: `${y}%`, width: size, height: size,
+              background: `radial-gradient(circle, ${c}88, transparent 70%)`,
+              filter: "blur(2px)",
+            }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: [0.6, 1.15, 0.85], opacity: [0.4, 0.95, 0.6] }}
+            transition={{ duration: 3 + (i % 4), repeat: Infinity, repeatType: "reverse", delay: (i % 8) * 0.15 }}
+          />
+        );
+      })}
+      <motion.div
+        initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+        className="absolute left-3 top-3 rounded border border-[var(--neon-cyan)]/40 bg-black/60 px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-[var(--neon-cyan)] backdrop-blur">
+        Live · {pts.length} events
+      </motion.div>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+        className="absolute bottom-3 right-3 flex gap-2 text-[10px] font-mono uppercase tracking-widest">
+        <span className="rounded border border-[var(--neon-cyan)]/40 bg-black/60 px-2 py-1 text-[var(--neon-cyan)]">low</span>
+        <span className="rounded border border-[var(--neon-amber)]/40 bg-black/60 px-2 py-1 text-[var(--neon-amber)]">mid</span>
+        <span className="rounded border border-[var(--neon-pink)]/40 bg-black/60 px-2 py-1 text-[var(--neon-pink)]">high</span>
+      </motion.div>
+    </div>
   );
 }
 
