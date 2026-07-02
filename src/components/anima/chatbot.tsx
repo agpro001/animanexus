@@ -24,11 +24,13 @@ export function ChatDock() {
   if (!transportRef.current)
     transportRef.current = new DefaultChatTransport<UIMessage>({
       api: "/api/chat",
-      headers: async () => {
+      fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
         const { data } = await supabase.auth.getSession();
         const token = data.session?.access_token;
-        return token ? { Authorization: `Bearer ${token}` } : {};
-      },
+        const headers = new Headers(init?.headers);
+        if (token) headers.set("Authorization", `Bearer ${token}`);
+        return fetch(input, { ...init, headers });
+      }) as typeof fetch,
     });
   const { messages, sendMessage, status, stop, setMessages, regenerate } = useChat<UIMessage>({
     transport: transportRef.current!,
