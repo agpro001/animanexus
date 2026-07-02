@@ -58,6 +58,36 @@ export type Database = {
           },
         ]
       }
+      ai_entitlements: {
+        Row: {
+          created_at: string
+          free_used: number
+          paid_credits: number
+          stripe_customer_id: string | null
+          subscribed_until: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          free_used?: number
+          paid_credits?: number
+          stripe_customer_id?: string | null
+          subscribed_until?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          free_used?: number
+          paid_credits?: number
+          stripe_customer_id?: string | null
+          subscribed_until?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ai_errors: {
         Row: {
           created_at: string
@@ -599,6 +629,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      consume_ai_credit: { Args: { _user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
