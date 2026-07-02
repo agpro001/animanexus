@@ -227,43 +227,6 @@ function BigHeatmap({ points }: { points: LiveThreat[] }) {
   );
 }
 
-function Heatmap({ points }: { points: LiveThreat[] }) {
-  const pts = points.slice(0, 40);
-  return (
-    <div className="relative mt-3 h-64 overflow-hidden rounded-md border border-white/10 bg-[oklch(0.1_0.025_260)]">
-      <iframe
-        title="Windy wind overlay"
-        src="https://embed.windy.com/embed.html?type=map&location=coordinates&metricRain=mm&metricTemp=%C2%B0C&metricWind=mph&zoom=3&overlay=wind&product=ecmwf&level=surface&lat=6.49&lon=103.535&detailLat=21.795813892705674&detailLon=84.36776642176224&detail=true&pressure=true&message=true"
-        className="absolute inset-0 h-full w-full"
-        loading="lazy"
-        referrerPolicy="no-referrer"
-        frameBorder={0}
-      />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,oklch(0.05_0.02_260/0.65)_100%)]" />
-      {pts.length === 0 && (
-        <div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">Awaiting live signal…</div>
-      )}
-      {pts.map((p) => {
-        const x = ((p.lon + 180) / 360) * 100;
-        const y = ((90 - p.lat) / 180) * 100;
-        const c = p.severity >= 5 ? "var(--neon-pink)" : p.severity >= 4 ? "var(--neon-amber)" : "var(--neon-cyan)";
-        const size = 30 + p.severity * 14;
-        return (
-          <div key={p.id} title={p.title} className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full" style={{
-            left: `${x}%`, top: `${y}%`,
-            width: size, height: size,
-            background: `radial-gradient(circle, ${c}66, transparent 70%)`,
-            filter: "blur(2px)",
-          }} />
-        );
-      })}
-      <div className="absolute right-2 top-2 rounded border border-[var(--neon-cyan)]/40 bg-black/60 px-2 py-1 text-[10px] font-mono uppercase tracking-widest text-[var(--neon-cyan)] backdrop-blur">
-        Windy.com · {pts.length} live events
-      </div>
-    </div>
-  );
-}
-
 function ReportForm({ onClose, onSaved, userId }: { onClose: () => void; onSaved: () => void; userId: string }) {
   const [form, setForm] = useState({ zone_name: "", threat: "fire", description: "" });
   const [busy, setBusy] = useState(false);
