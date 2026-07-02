@@ -32,6 +32,7 @@ import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiAnalyzeRouteImport } from './routes/api/analyze'
 import { Route as ApiBillingStatusRouteImport } from './routes/api/billing/status'
 import { Route as ApiBillingPortalRouteImport } from './routes/api/billing/portal'
+import { Route as ApiBillingConfirmRouteImport } from './routes/api/billing/confirm'
 import { Route as ApiBillingCheckoutRouteImport } from './routes/api/billing/checkout'
 
 const WildlifeRoute = WildlifeRouteImport.update({
@@ -149,6 +150,11 @@ const ApiBillingPortalRoute = ApiBillingPortalRouteImport.update({
   path: '/api/billing/portal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBillingConfirmRoute = ApiBillingConfirmRouteImport.update({
+  id: '/api/billing/confirm',
+  path: '/api/billing/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiBillingCheckoutRoute = ApiBillingCheckoutRouteImport.update({
   id: '/api/billing/checkout',
   path: '/api/billing/checkout',
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/confirm': typeof ApiBillingConfirmRoute
   '/api/billing/portal': typeof ApiBillingPortalRoute
   '/api/billing/status': typeof ApiBillingStatusRoute
 }
@@ -204,6 +211,7 @@ export interface FileRoutesByTo {
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/confirm': typeof ApiBillingConfirmRoute
   '/api/billing/portal': typeof ApiBillingPortalRoute
   '/api/billing/status': typeof ApiBillingStatusRoute
 }
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/confirm': typeof ApiBillingConfirmRoute
   '/api/billing/portal': typeof ApiBillingPortalRoute
   '/api/billing/status': typeof ApiBillingStatusRoute
 }
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/wildlife-feed'
     | '/api/billing/checkout'
+    | '/api/billing/confirm'
     | '/api/billing/portal'
     | '/api/billing/status'
   fileRoutesByTo: FileRoutesByTo
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/wildlife-feed'
     | '/api/billing/checkout'
+    | '/api/billing/confirm'
     | '/api/billing/portal'
     | '/api/billing/status'
   id:
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/api/health'
     | '/api/wildlife-feed'
     | '/api/billing/checkout'
+    | '/api/billing/confirm'
     | '/api/billing/portal'
     | '/api/billing/status'
   fileRoutesById: FileRoutesById
@@ -338,6 +350,7 @@ export interface RootRouteChildren {
   ApiHealthRoute: typeof ApiHealthRoute
   ApiWildlifeFeedRoute: typeof ApiWildlifeFeedRoute
   ApiBillingCheckoutRoute: typeof ApiBillingCheckoutRoute
+  ApiBillingConfirmRoute: typeof ApiBillingConfirmRoute
   ApiBillingPortalRoute: typeof ApiBillingPortalRoute
   ApiBillingStatusRoute: typeof ApiBillingStatusRoute
 }
@@ -505,6 +518,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBillingPortalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/billing/confirm': {
+      id: '/api/billing/confirm'
+      path: '/api/billing/confirm'
+      fullPath: '/api/billing/confirm'
+      preLoaderRoute: typeof ApiBillingConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/billing/checkout': {
       id: '/api/billing/checkout'
       path: '/api/billing/checkout'
@@ -538,6 +558,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiHealthRoute: ApiHealthRoute,
   ApiWildlifeFeedRoute: ApiWildlifeFeedRoute,
   ApiBillingCheckoutRoute: ApiBillingCheckoutRoute,
+  ApiBillingConfirmRoute: ApiBillingConfirmRoute,
   ApiBillingPortalRoute: ApiBillingPortalRoute,
   ApiBillingStatusRoute: ApiBillingStatusRoute,
 }
