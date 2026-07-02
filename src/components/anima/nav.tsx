@@ -16,6 +16,7 @@ const PRIMARY = [
   { to: "/audio", label: "Audio" },
   { to: "/emergency", label: "Emergency" },
   { to: "/analytics", label: "Analytics" },
+  { to: "/pricing", label: "Pricing" },
 ] as const;
 
 export function Nav() {
