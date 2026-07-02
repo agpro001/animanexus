@@ -13,6 +13,7 @@ import { Route as WildlifeRouteImport } from './routes/wildlife'
 import { Route as TwinRouteImport } from './routes/twin'
 import { Route as ShelterRouteImport } from './routes/shelter'
 import { Route as SecurityRouteImport } from './routes/security'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LostRouteImport } from './routes/lost'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HealthRouteImport } from './routes/health'
@@ -53,6 +54,11 @@ const ShelterRoute = ShelterRouteImport.update({
 const SecurityRoute = SecurityRouteImport.update({
   id: '/security',
   path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LostRoute = LostRouteImport.update({
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -202,6 +209,7 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -230,6 +238,7 @@ export interface FileRoutesById {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
@@ -286,6 +296,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
@@ -313,6 +324,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
@@ -341,6 +353,7 @@ export interface RootRouteChildren {
   HealthRoute: typeof HealthRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LostRoute: typeof LostRoute
+  PricingRoute: typeof PricingRoute
   SecurityRoute: typeof SecurityRoute
   ShelterRoute: typeof ShelterRoute
   TwinRoute: typeof TwinRoute
@@ -383,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/security'
       fullPath: '/security'
       preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lost': {
@@ -549,6 +569,7 @@ const rootRouteChildren: RootRouteChildren = {
   HealthRoute: HealthRoute,
   HowItWorksRoute: HowItWorksRoute,
   LostRoute: LostRoute,
+  PricingRoute: PricingRoute,
   SecurityRoute: SecurityRoute,
   ShelterRoute: ShelterRoute,
   TwinRoute: TwinRoute,
