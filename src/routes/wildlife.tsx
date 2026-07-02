@@ -143,7 +143,7 @@ function WildlifePage() {
           })}
         </div>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <div className="mt-6 grid gap-4">
           <GlassCard>
             <h3 className="flex items-center gap-2 font-display text-lg font-semibold"><AlertTriangle className="h-5 w-5 text-[var(--neon-amber)]" /> Recent community alerts</h3>
             <div className="mt-3 space-y-2">
@@ -158,15 +158,6 @@ function WildlifePage() {
                   </div>
                 ))}
             </div>
-          </GlassCard>
-
-          <GlassCard>
-            <motion.h3
-              initial={{ opacity: 0, y: 8 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="flex items-center gap-2 font-display text-lg font-semibold">
-              <Globe2 className="h-5 w-5 text-[var(--neon-cyan)]" /> Compact heatmap
-            </motion.h3>
-            <Heatmap points={live} />
           </GlassCard>
         </div>
       </PageSection>
