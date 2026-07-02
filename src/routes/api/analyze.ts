@@ -45,7 +45,7 @@ export const Route = createFileRoute("/api/analyze")({
         const requestId =
           request.headers.get("x-request-id") ||
           (globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`);
-        const model = "meta-llama/llama-4-scout-17b-16e-instruct";
+        const model = "google/gemini-2.5-flash-lite";
         const logError = async (status: number, kind: string | null, error_message: string, meta?: Record<string, unknown>) => {
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -94,11 +94,11 @@ export const Route = createFileRoute("/api/analyze")({
         if (userContent.length === 0) userContent.push({ type: "text", text: "Analyze this case." });
 
         try {
-          const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+          const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${process.env.GROQ_API_KEY || ""}`,
+              "Authorization": `Bearer ${process.env.LOVABLE_API_KEY || ""}`,
             },
             body: JSON.stringify({
               model,
