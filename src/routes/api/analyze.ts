@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
+import { consumeCredit, getUserFromRequest, paywallResponse } from "@/lib/billing.server";
 
 type Kind = "health_photo" | "audio" | "symptom" | "twin_summary" | "emergency" | "shelter_match" | "wildlife";
 
@@ -84,6 +85,24 @@ export const Route = createFileRoute("/api/analyze")({
         if (!kind || !SYSTEMS[kind]) {
           await logError(400, kind ?? null, "invalid_kind");
           return respond(400, { error: "invalid_kind" });
+        }
+
+        // Auth + entitlement gate
+        const user = await getUserFromRequest(request);
+        if (!user) {
+          await logError(401, kind, "auth_required");
+          return paywallResponse(requestId, 401, "auth_required");
+        }
+        let consumed;
+        try { consumed = await consumeCredit(user.id); }
+        catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          await logError(500, kind, `credit_check_failed: ${msg}`);
+          return respond(500, { error: "credit_check_failed", detail: msg });
+        }
+        if (!consumed.ok) {
+          await logError(402, kind, "paywall");
+          return paywallResponse(requestId, 402, "paywall");
         }
 
         const userContent: Array<Record<string, unknown>> = [];

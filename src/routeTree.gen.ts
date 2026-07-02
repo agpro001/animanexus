@@ -13,6 +13,7 @@ import { Route as WildlifeRouteImport } from './routes/wildlife'
 import { Route as TwinRouteImport } from './routes/twin'
 import { Route as ShelterRouteImport } from './routes/shelter'
 import { Route as SecurityRouteImport } from './routes/security'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as LostRouteImport } from './routes/lost'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HealthRouteImport } from './routes/health'
@@ -30,6 +31,10 @@ import { Route as ApiWildlifeFeedRouteImport } from './routes/api/wildlife-feed'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiAnalyzeRouteImport } from './routes/api/analyze'
+import { Route as ApiBillingStatusRouteImport } from './routes/api/billing/status'
+import { Route as ApiBillingPortalRouteImport } from './routes/api/billing/portal'
+import { Route as ApiBillingConfirmRouteImport } from './routes/api/billing/confirm'
+import { Route as ApiBillingCheckoutRouteImport } from './routes/api/billing/checkout'
 
 const WildlifeRoute = WildlifeRouteImport.update({
   id: '/wildlife',
@@ -49,6 +54,11 @@ const ShelterRoute = ShelterRouteImport.update({
 const SecurityRoute = SecurityRouteImport.update({
   id: '/security',
   path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LostRoute = LostRouteImport.update({
@@ -136,6 +146,26 @@ const ApiAnalyzeRoute = ApiAnalyzeRouteImport.update({
   path: '/api/analyze',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiBillingStatusRoute = ApiBillingStatusRouteImport.update({
+  id: '/api/billing/status',
+  path: '/api/billing/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBillingPortalRoute = ApiBillingPortalRouteImport.update({
+  id: '/api/billing/portal',
+  path: '/api/billing/portal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBillingConfirmRoute = ApiBillingConfirmRouteImport.update({
+  id: '/api/billing/confirm',
+  path: '/api/billing/confirm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiBillingCheckoutRoute = ApiBillingCheckoutRouteImport.update({
+  id: '/api/billing/checkout',
+  path: '/api/billing/checkout',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -151,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -159,6 +190,10 @@ export interface FileRoutesByFullPath {
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
+  '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/confirm': typeof ApiBillingConfirmRoute
+  '/api/billing/portal': typeof ApiBillingPortalRoute
+  '/api/billing/status': typeof ApiBillingStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -174,6 +209,7 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -182,6 +218,10 @@ export interface FileRoutesByTo {
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
+  '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/confirm': typeof ApiBillingConfirmRoute
+  '/api/billing/portal': typeof ApiBillingPortalRoute
+  '/api/billing/status': typeof ApiBillingStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -198,6 +238,7 @@ export interface FileRoutesById {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
@@ -206,6 +247,10 @@ export interface FileRoutesById {
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
+  '/api/billing/checkout': typeof ApiBillingCheckoutRoute
+  '/api/billing/confirm': typeof ApiBillingConfirmRoute
+  '/api/billing/portal': typeof ApiBillingPortalRoute
+  '/api/billing/status': typeof ApiBillingStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -223,6 +268,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
@@ -231,6 +277,10 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/health'
     | '/api/wildlife-feed'
+    | '/api/billing/checkout'
+    | '/api/billing/confirm'
+    | '/api/billing/portal'
+    | '/api/billing/status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -246,6 +296,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
@@ -254,6 +305,10 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/health'
     | '/api/wildlife-feed'
+    | '/api/billing/checkout'
+    | '/api/billing/confirm'
+    | '/api/billing/portal'
+    | '/api/billing/status'
   id:
     | '__root__'
     | '/'
@@ -269,6 +324,7 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
@@ -277,6 +333,10 @@ export interface FileRouteTypes {
     | '/api/chat'
     | '/api/health'
     | '/api/wildlife-feed'
+    | '/api/billing/checkout'
+    | '/api/billing/confirm'
+    | '/api/billing/portal'
+    | '/api/billing/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -293,6 +353,7 @@ export interface RootRouteChildren {
   HealthRoute: typeof HealthRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LostRoute: typeof LostRoute
+  PricingRoute: typeof PricingRoute
   SecurityRoute: typeof SecurityRoute
   ShelterRoute: typeof ShelterRoute
   TwinRoute: typeof TwinRoute
@@ -301,6 +362,10 @@ export interface RootRouteChildren {
   ApiChatRoute: typeof ApiChatRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiWildlifeFeedRoute: typeof ApiWildlifeFeedRoute
+  ApiBillingCheckoutRoute: typeof ApiBillingCheckoutRoute
+  ApiBillingConfirmRoute: typeof ApiBillingConfirmRoute
+  ApiBillingPortalRoute: typeof ApiBillingPortalRoute
+  ApiBillingStatusRoute: typeof ApiBillingStatusRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -331,6 +396,13 @@ declare module '@tanstack/react-router' {
       path: '/security'
       fullPath: '/security'
       preLoaderRoute: typeof SecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lost': {
@@ -452,6 +524,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAnalyzeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/billing/status': {
+      id: '/api/billing/status'
+      path: '/api/billing/status'
+      fullPath: '/api/billing/status'
+      preLoaderRoute: typeof ApiBillingStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/billing/portal': {
+      id: '/api/billing/portal'
+      path: '/api/billing/portal'
+      fullPath: '/api/billing/portal'
+      preLoaderRoute: typeof ApiBillingPortalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/billing/confirm': {
+      id: '/api/billing/confirm'
+      path: '/api/billing/confirm'
+      fullPath: '/api/billing/confirm'
+      preLoaderRoute: typeof ApiBillingConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/billing/checkout': {
+      id: '/api/billing/checkout'
+      path: '/api/billing/checkout'
+      fullPath: '/api/billing/checkout'
+      preLoaderRoute: typeof ApiBillingCheckoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -469,6 +569,7 @@ const rootRouteChildren: RootRouteChildren = {
   HealthRoute: HealthRoute,
   HowItWorksRoute: HowItWorksRoute,
   LostRoute: LostRoute,
+  PricingRoute: PricingRoute,
   SecurityRoute: SecurityRoute,
   ShelterRoute: ShelterRoute,
   TwinRoute: TwinRoute,
@@ -477,6 +578,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiChatRoute: ApiChatRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiWildlifeFeedRoute: ApiWildlifeFeedRoute,
+  ApiBillingCheckoutRoute: ApiBillingCheckoutRoute,
+  ApiBillingConfirmRoute: ApiBillingConfirmRoute,
+  ApiBillingPortalRoute: ApiBillingPortalRoute,
+  ApiBillingStatusRoute: ApiBillingStatusRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

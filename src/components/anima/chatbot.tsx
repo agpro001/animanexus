@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageSquare, X, Send, Sparkles, Square, RotateCw, AlertTriangle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Logo } from "./logo";
+import { supabase } from "@/integrations/supabase/client";
+import { PaywallModal } from "./paywall";
 
 const SUGGESTIONS = [
   "How does the digital twin work?",
@@ -16,16 +18,28 @@ const SUGGESTIONS = [
 export function ChatDock() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [errorState, setErrorState] = useState<{ kind: "rate" | "credits" | "generic"; message: string } | null>(null);
+  const [errorState, setErrorState] = useState<{ kind: "rate" | "credits" | "auth" | "generic"; message: string } | null>(null);
+  const [paywall, setPaywall] = useState<null | "paywall" | "auth_required">(null);
   const transportRef = useRef<DefaultChatTransport<UIMessage> | null>(null);
-  if (!transportRef.current) transportRef.current = new DefaultChatTransport<UIMessage>({ api: "/api/chat" });
+  if (!transportRef.current)
+    transportRef.current = new DefaultChatTransport<UIMessage>({
+      api: "/api/chat",
+      fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
+        const { data } = await supabase.auth.getSession();
+        const token = data.session?.access_token;
+        const headers = new Headers(init?.headers);
+        if (token) headers.set("Authorization", `Bearer ${token}`);
+        return fetch(input, { ...init, headers });
+      }) as typeof fetch,
+    });
   const { messages, sendMessage, status, stop, setMessages, regenerate } = useChat<UIMessage>({
     transport: transportRef.current!,
     onError: (e) => {
       console.error("chat error", e);
       const msg = (e as Error)?.message ?? "";
       if (/429|rate/i.test(msg)) setErrorState({ kind: "rate", message: "You're sending messages too quickly. Pause for a minute and try again." });
-      else if (/402|credit/i.test(msg)) setErrorState({ kind: "credits", message: "AI credits exhausted. Please top up in workspace billing." });
+      else if (/402|paywall/i.test(msg)) { setPaywall("paywall"); setErrorState(null); }
+      else if (/401|auth_required/i.test(msg)) { setPaywall("auth_required"); setErrorState(null); }
       else if (/ai_not_configured|LOVABLE_API_KEY|AI gateway not configured/i.test(msg)) setErrorState({ kind: "generic", message: "AI is not configured on this host. If you deployed to Vercel, add LOVABLE_API_KEY in Project Settings → Environment Variables and redeploy. On Lovable preview this works automatically." });
       else setErrorState({ kind: "generic", message: msg || "Something went wrong. Tap retry." });
     },
@@ -55,6 +69,7 @@ export function ChatDock() {
 
   return (
     <>
+      <PaywallModal open={paywall !== null} onClose={() => setPaywall(null)} reason={paywall ?? undefined} />
       <motion.button
         onClick={() => setOpen((o) => !o)}
         initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.6, type: "spring" }}
