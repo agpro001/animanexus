@@ -14,6 +14,7 @@ import { Route as TwinRouteImport } from './routes/twin'
 import { Route as ShelterRouteImport } from './routes/shelter'
 import { Route as SecurityRouteImport } from './routes/security'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LostRouteImport } from './routes/lost'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HealthRouteImport } from './routes/health'
@@ -31,10 +32,13 @@ import { Route as ApiWildlifeFeedRouteImport } from './routes/api/wildlife-feed'
 import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiAnalyzeRouteImport } from './routes/api/analyze'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as ApiBillingStatusRouteImport } from './routes/api/billing/status'
 import { Route as ApiBillingPortalRouteImport } from './routes/api/billing/portal'
 import { Route as ApiBillingConfirmRouteImport } from './routes/api/billing/confirm'
 import { Route as ApiBillingCheckoutRouteImport } from './routes/api/billing/checkout'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 
 const WildlifeRoute = WildlifeRouteImport.update({
   id: '/wildlife',
@@ -59,6 +63,11 @@ const SecurityRoute = SecurityRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LostRoute = LostRouteImport.update({
@@ -146,6 +155,18 @@ const ApiAnalyzeRoute = ApiAnalyzeRouteImport.update({
   path: '/api/analyze',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiBillingStatusRoute = ApiBillingStatusRouteImport.update({
   id: '/api/billing/status',
   path: '/api/billing/status',
@@ -166,6 +187,12 @@ const ApiBillingCheckoutRoute = ApiBillingCheckoutRouteImport.update({
   path: '/api/billing/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -181,15 +208,19 @@ export interface FileRoutesByFullPath {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
   '/wildlife': typeof WildlifeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/confirm': typeof ApiBillingConfirmRoute
   '/api/billing/portal': typeof ApiBillingPortalRoute
@@ -209,15 +240,19 @@ export interface FileRoutesByTo {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
   '/wildlife': typeof WildlifeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/confirm': typeof ApiBillingConfirmRoute
   '/api/billing/portal': typeof ApiBillingPortalRoute
@@ -238,15 +273,19 @@ export interface FileRoutesById {
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
+  '/mcp': typeof McpRoute
   '/pricing': typeof PricingRoute
   '/security': typeof SecurityRoute
   '/shelter': typeof ShelterRoute
   '/twin': typeof TwinRoute
   '/wildlife': typeof WildlifeRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/api/analyze': typeof ApiAnalyzeRoute
   '/api/chat': typeof ApiChatRoute
   '/api/health': typeof ApiHealthRoute
   '/api/wildlife-feed': typeof ApiWildlifeFeedRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/billing/checkout': typeof ApiBillingCheckoutRoute
   '/api/billing/confirm': typeof ApiBillingConfirmRoute
   '/api/billing/portal': typeof ApiBillingPortalRoute
@@ -268,15 +307,19 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/mcp'
     | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
     | '/wildlife'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/analyze'
     | '/api/chat'
     | '/api/health'
     | '/api/wildlife-feed'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/billing/checkout'
     | '/api/billing/confirm'
     | '/api/billing/portal'
@@ -296,15 +339,19 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/mcp'
     | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
     | '/wildlife'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/analyze'
     | '/api/chat'
     | '/api/health'
     | '/api/wildlife-feed'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/billing/checkout'
     | '/api/billing/confirm'
     | '/api/billing/portal'
@@ -324,15 +371,19 @@ export interface FileRouteTypes {
     | '/health'
     | '/how-it-works'
     | '/lost'
+    | '/mcp'
     | '/pricing'
     | '/security'
     | '/shelter'
     | '/twin'
     | '/wildlife'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/api/analyze'
     | '/api/chat'
     | '/api/health'
     | '/api/wildlife-feed'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/billing/checkout'
     | '/api/billing/confirm'
     | '/api/billing/portal'
@@ -353,15 +404,19 @@ export interface RootRouteChildren {
   HealthRoute: typeof HealthRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LostRoute: typeof LostRoute
+  McpRoute: typeof McpRoute
   PricingRoute: typeof PricingRoute
   SecurityRoute: typeof SecurityRoute
   ShelterRoute: typeof ShelterRoute
   TwinRoute: typeof TwinRoute
   WildlifeRoute: typeof WildlifeRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   ApiAnalyzeRoute: typeof ApiAnalyzeRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiHealthRoute: typeof ApiHealthRoute
   ApiWildlifeFeedRoute: typeof ApiWildlifeFeedRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiBillingCheckoutRoute: typeof ApiBillingCheckoutRoute
   ApiBillingConfirmRoute: typeof ApiBillingConfirmRoute
   ApiBillingPortalRoute: typeof ApiBillingPortalRoute
@@ -403,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/lost': {
@@ -524,6 +586,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAnalyzeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/billing/status': {
       id: '/api/billing/status'
       path: '/api/billing/status'
@@ -552,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBillingCheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -569,15 +652,20 @@ const rootRouteChildren: RootRouteChildren = {
   HealthRoute: HealthRoute,
   HowItWorksRoute: HowItWorksRoute,
   LostRoute: LostRoute,
+  McpRoute: McpRoute,
   PricingRoute: PricingRoute,
   SecurityRoute: SecurityRoute,
   ShelterRoute: ShelterRoute,
   TwinRoute: TwinRoute,
   WildlifeRoute: WildlifeRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   ApiAnalyzeRoute: ApiAnalyzeRoute,
   ApiChatRoute: ApiChatRoute,
   ApiHealthRoute: ApiHealthRoute,
   ApiWildlifeFeedRoute: ApiWildlifeFeedRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiBillingCheckoutRoute: ApiBillingCheckoutRoute,
   ApiBillingConfirmRoute: ApiBillingConfirmRoute,
   ApiBillingPortalRoute: ApiBillingPortalRoute,
