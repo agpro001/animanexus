@@ -43,7 +43,7 @@ export const Route = createFileRoute("/api/chat")({
         const requestId =
           request.headers.get("x-request-id") ||
           (globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`);
-        const model = "google/gemini-2.5-flash-lite";
+        const model = "llama-3.3-70b-versatile";
         const logError = async (status: number, error_message: string, meta?: Record<string, unknown>) => {
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -103,13 +103,17 @@ export const Route = createFileRoute("/api/chat")({
           }
 
           const messages = body.messages;
+          const groqKey = process.env.GROQ_API_KEY;
+          if (!groqKey) {
+            await logError(500, "GROQ_API_KEY missing");
+            return new Response(JSON.stringify({ error: "ai_not_configured", requestId }), {
+              status: 500, headers: { "content-type": "application/json", "x-request-id": requestId },
+            });
+          }
           const gateway = createOpenAICompatible({
-            name: "lovable",
-            baseURL: "https://ai.gateway.lovable.dev/v1",
-            headers: {
-              "Lovable-API-Key": process.env.LOVABLE_API_KEY || "",
-              "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-            },
+            name: "groq",
+            baseURL: "https://api.groq.com/openai/v1",
+            headers: { Authorization: `Bearer ${groqKey}` },
           });
           const result = streamText({
             model: gateway(model),

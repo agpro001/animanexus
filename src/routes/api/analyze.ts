@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/analyze")({
         const requestId =
           request.headers.get("x-request-id") ||
           (globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`);
-        const model = "google/gemini-2.5-flash-lite";
+        const model = "meta-llama/llama-4-scout-17b-16e-instruct";
         const logError = async (status: number, kind: string | null, error_message: string, meta?: Record<string, unknown>) => {
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -105,19 +105,55 @@ export const Route = createFileRoute("/api/analyze")({
           return paywallResponse(requestId, 402, "paywall");
         }
 
+        const groqKey = process.env.GROQ_API_KEY;
+        if (!groqKey) {
+          await logError(500, kind, "GROQ_API_KEY missing");
+          return respond(500, { error: "ai_not_configured" });
+        }
+
+        // Groq's Llama 4 Scout is text + image only. Transcribe audio first via Whisper.
+        let audioTranscript: string | null = null;
+        if (audio?.dataBase64) {
+          try {
+            const bin = Uint8Array.from(atob(audio.dataBase64), (c) => c.charCodeAt(0));
+            const fmt = (audio.format || "webm").toLowerCase();
+            const mime = fmt === "mp3" ? "audio/mpeg" : fmt === "wav" ? "audio/wav" : fmt === "m4a" ? "audio/mp4" : fmt === "ogg" ? "audio/ogg" : "audio/webm";
+            const fd = new FormData();
+            fd.append("file", new Blob([bin], { type: mime }), `audio.${fmt}`);
+            fd.append("model", "whisper-large-v3");
+            const tr = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+              method: "POST",
+              headers: { Authorization: `Bearer ${groqKey}` },
+              body: fd,
+            });
+            if (tr.ok) {
+              const tj = (await tr.json()) as { text?: string };
+              audioTranscript = tj.text ?? null;
+            } else {
+              const t = await tr.text();
+              await logError(tr.status, kind, `whisper_error: ${t.slice(0, 400)}`);
+            }
+          } catch (e) {
+            await logError(500, kind, `whisper_exception: ${e instanceof Error ? e.message : String(e)}`);
+          }
+        }
+
         const userContent: Array<Record<string, unknown>> = [];
-        const userText = [prompt, context ? `Context: ${JSON.stringify(context)}` : null].filter(Boolean).join("\n\n");
+        const userText = [
+          prompt,
+          context ? `Context: ${JSON.stringify(context)}` : null,
+          audioTranscript ? `Audio transcript / vocalisation notes: ${audioTranscript}` : null,
+        ].filter(Boolean).join("\n\n");
         if (userText) userContent.push({ type: "text", text: userText });
         if (imageDataUrl) userContent.push({ type: "image_url", image_url: { url: imageDataUrl } });
-        if (audio?.dataBase64) userContent.push({ type: "input_audio", input_audio: { data: audio.dataBase64, format: audio.format } });
         if (userContent.length === 0) userContent.push({ type: "text", text: "Analyze this case." });
 
         try {
-          const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+          const r = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${process.env.LOVABLE_API_KEY || ""}`,
+              "Authorization": `Bearer ${groqKey}`,
             },
             body: JSON.stringify({
               model,
@@ -126,6 +162,7 @@ export const Route = createFileRoute("/api/analyze")({
                 { role: "user", content: userContent },
               ],
               response_format: { type: "json_object" },
+              temperature: 0.4,
             }),
           });
           if (!r.ok) {
