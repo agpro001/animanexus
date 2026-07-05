@@ -18,6 +18,7 @@ import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LostRouteImport } from './routes/lost'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as HealthRouteImport } from './routes/health'
+import { Route as FaviconDotsvgRouteImport } from './routes/favicon[.]svg'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as DemoRouteImport } from './routes/demo'
@@ -83,6 +84,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaviconDotsvgRoute = FaviconDotsvgRouteImport.update({
+  id: '/favicon.svg',
+  path: '/favicon.svg',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/faq': typeof FaqRoute
+  '/favicon.svg': typeof FaviconDotsvgRoute
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
@@ -237,6 +244,7 @@ export interface FileRoutesByTo {
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/faq': typeof FaqRoute
+  '/favicon.svg': typeof FaviconDotsvgRoute
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
@@ -270,6 +278,7 @@ export interface FileRoutesById {
   '/demo': typeof DemoRoute
   '/emergency': typeof EmergencyRoute
   '/faq': typeof FaqRoute
+  '/favicon.svg': typeof FaviconDotsvgRoute
   '/health': typeof HealthRoute
   '/how-it-works': typeof HowItWorksRoute
   '/lost': typeof LostRoute
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/emergency'
     | '/faq'
+    | '/favicon.svg'
     | '/health'
     | '/how-it-works'
     | '/lost'
@@ -336,6 +346,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/emergency'
     | '/faq'
+    | '/favicon.svg'
     | '/health'
     | '/how-it-works'
     | '/lost'
@@ -368,6 +379,7 @@ export interface FileRouteTypes {
     | '/demo'
     | '/emergency'
     | '/faq'
+    | '/favicon.svg'
     | '/health'
     | '/how-it-works'
     | '/lost'
@@ -401,6 +413,7 @@ export interface RootRouteChildren {
   DemoRoute: typeof DemoRoute
   EmergencyRoute: typeof EmergencyRoute
   FaqRoute: typeof FaqRoute
+  FaviconDotsvgRoute: typeof FaviconDotsvgRoute
   HealthRoute: typeof HealthRoute
   HowItWorksRoute: typeof HowItWorksRoute
   LostRoute: typeof LostRoute
@@ -486,6 +499,13 @@ declare module '@tanstack/react-router' {
       path: '/health'
       fullPath: '/health'
       preLoaderRoute: typeof HealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favicon.svg': {
+      id: '/favicon.svg'
+      path: '/favicon.svg'
+      fullPath: '/favicon.svg'
+      preLoaderRoute: typeof FaviconDotsvgRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -649,6 +669,7 @@ const rootRouteChildren: RootRouteChildren = {
   DemoRoute: DemoRoute,
   EmergencyRoute: EmergencyRoute,
   FaqRoute: FaqRoute,
+  FaviconDotsvgRoute: FaviconDotsvgRoute,
   HealthRoute: HealthRoute,
   HowItWorksRoute: HowItWorksRoute,
   LostRoute: LostRoute,
