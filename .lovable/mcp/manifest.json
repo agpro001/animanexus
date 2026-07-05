@@ -1,0 +1,140 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "anima-nexus-mcp",
+      "version": "0.1.0",
+      "title": "ANIMA Nexus"
+    },
+    "tools": [
+      {
+        "name": "platform_overview",
+        "title": "ANIMA Nexus platform overview",
+        "description": "Returns the list of ANIMA Nexus modules, their routes, and what each one does. Use this to help users find the right feature.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "module": {
+              "description": "Optional single module key to fetch. Omit to list all modules.",
+              "type": "string",
+              "enum": [
+                "twin",
+                "health",
+                "lost",
+                "shelter",
+                "wildlife",
+                "audio",
+                "emergency",
+                "analytics",
+                "admin"
+              ]
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_wildlife_threats",
+        "title": "Get live wildlife threats",
+        "description": "Fetches ANIMA Nexus Wildlife Guardian's live habitat threat feed: NASA EONET events (fires, storms, floods, drought, volcanoes) and USGS significant earthquakes. Sorted by severity.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "minSeverity": {
+              "description": "Only return threats with severity >= this value (1-5).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 5
+            },
+            "limit": {
+              "description": "Max number of threats to return (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "animal_health_triage",
+        "title": "Animal health triage",
+        "description": "AI-powered symptom triage for a pet or animal. Returns a plain-language assessment, urgency label (routine / soon / urgent / emergency), and next steps. Always advises consulting a vet for anything serious.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "species": {
+              "type": "string",
+              "description": "Species or breed, e.g. 'dog', 'cat', 'parrot', 'labrador'."
+            },
+            "symptoms": {
+              "type": "string",
+              "description": "Describe the observed symptoms and their duration."
+            },
+            "ageYears": {
+              "description": "Animal age in years, if known.",
+              "type": "number"
+            }
+          },
+          "required": [
+            "species",
+            "symptoms"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "emergency_first_aid",
+        "title": "Animal emergency first aid",
+        "description": "Returns step-by-step first-aid guidance for an animal emergency (poisoning, heatstroke, bleeding, seizure, bloat, hit-by-car, snakebite, etc.). Always starts with 'call your vet or emergency animal hospital NOW'.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "species": {
+              "type": "string",
+              "description": "Species, e.g. 'dog', 'cat', 'horse'."
+            },
+            "condition": {
+              "type": "string",
+              "description": "The emergency condition or what happened, e.g. 'ate chocolate', 'heatstroke', 'hit by car'."
+            }
+          },
+          "required": [
+            "species",
+            "condition"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
