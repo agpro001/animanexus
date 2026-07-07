@@ -36,15 +36,15 @@ export function PaywallModal({ open, onClose, reason }: { open: boolean; onClose
               <X className="h-4 w-4" />
             </button>
             <div className="text-[10px] font-mono uppercase tracking-widest text-[var(--neon-cyan)]">
-              {reason === "auth_required" ? "Sign in required" : "Free uses exhausted"}
+              {reason === "auth_required" ? "Free trial used" : "Daily free uses exhausted"}
             </div>
             <h2 className="mt-1 font-display text-2xl font-semibold">
-              {reason === "auth_required" ? "Sign in to keep using AI" : "You've used your 3 free AI runs"}
+              {reason === "auth_required" ? "Sign up for 7 free AI uses per day" : "You've used today's 7 free AI runs"}
             </h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {reason === "auth_required"
-                ? "Create an account or sign in — every new user gets 3 free AI uses."
-                : "Pick a plan to continue. Cancel any time."}
+                ? "You used your 4 free AI runs. Create a free account to get 7 free AI uses every day — or pick a plan below."
+                : "Your daily free quota resets tomorrow. Pick a plan to keep going now — cancel any time."}
             </p>
 
             {!user ? (
