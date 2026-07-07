@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
-import { consumeCredit, getUserFromRequest, paywallResponse } from "@/lib/billing.server";
+import { consumeCredit, consumeAnonCredit, getUserFromRequest, getDeviceId, paywallResponse } from "@/lib/billing.server";
 
 type Kind = "health_photo" | "audio" | "symptom" | "twin_summary" | "emergency" | "shelter_match" | "wildlife";
 
@@ -87,22 +87,31 @@ export const Route = createFileRoute("/api/analyze")({
           return respond(400, { error: "invalid_kind" });
         }
 
-        // Auth + entitlement gate
+        // Entitlement gate: authed = 7/day + credits/subscription; anon = 4 lifetime by device
         const user = await getUserFromRequest(request);
-        if (!user) {
-          await logError(401, kind, "auth_required");
-          return paywallResponse(requestId, 401, "auth_required");
-        }
-        let consumed;
-        try { consumed = await consumeCredit(user.id); }
-        catch (e) {
+        try {
+          if (user) {
+            const consumed = await consumeCredit(user.id);
+            if (!consumed.ok) {
+              await logError(402, kind, "paywall");
+              return paywallResponse(requestId, 402, "paywall");
+            }
+          } else {
+            const deviceId = getDeviceId(request);
+            if (!deviceId) {
+              await logError(400, kind, "device_id_required");
+              return respond(400, { error: "device_id_required" });
+            }
+            const consumed = await consumeAnonCredit(deviceId);
+            if (!consumed.ok) {
+              await logError(402, kind, "signup_required");
+              return paywallResponse(requestId, 402, "signup_required");
+            }
+          }
+        } catch (e) {
           const msg = e instanceof Error ? e.message : String(e);
           await logError(500, kind, `credit_check_failed: ${msg}`);
           return respond(500, { error: "credit_check_failed", detail: msg });
-        }
-        if (!consumed.ok) {
-          await logError(402, kind, "paywall");
-          return paywallResponse(requestId, 402, "paywall");
         }
 
         const groqKey = process.env.GROQ_API_KEY;

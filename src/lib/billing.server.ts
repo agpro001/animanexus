@@ -33,6 +33,25 @@ export async function consumeCredit(userId: string): Promise<ConsumeResult> {
   return data as unknown as ConsumeResult;
 }
 
+export type AnonConsumeResult = {
+  ok: boolean;
+  reason: "anon_free" | "signup_required" | "invalid_device";
+  free_remaining: number;
+};
+
+export async function consumeAnonCredit(deviceId: string): Promise<AnonConsumeResult> {
+  const { data, error } = await supabaseAdmin.rpc("consume_anon_credit" as never, { _device_id: deviceId } as never);
+  if (error) throw new Error(`consume_anon_credit failed: ${error.message}`);
+  return data as unknown as AnonConsumeResult;
+}
+
+export function getDeviceId(req: Request): string | null {
+  const id = req.headers.get("x-device-id");
+  if (!id) return null;
+  const trimmed = id.trim().slice(0, 128);
+  return trimmed.length >= 8 ? trimmed : null;
+}
+
 export async function getEntitlement(userId: string) {
   const { data } = await supabaseAdmin
     .from("ai_entitlements")

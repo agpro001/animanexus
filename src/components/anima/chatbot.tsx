@@ -7,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import { Logo } from "./logo";
 import { supabase } from "@/integrations/supabase/client";
 import { PaywallModal } from "./paywall";
+import { getDeviceId } from "@/lib/anima-helpers";
 
 const SUGGESTIONS = [
   "How does the digital twin work?",
@@ -29,6 +30,8 @@ export function ChatDock() {
         const token = data.session?.access_token;
         const headers = new Headers(init?.headers);
         if (token) headers.set("Authorization", `Bearer ${token}`);
+        const dev = getDeviceId();
+        if (dev) headers.set("x-device-id", dev);
         return fetch(input, { ...init, headers });
       }) as typeof fetch,
     });
@@ -38,6 +41,7 @@ export function ChatDock() {
       console.error("chat error", e);
       const msg = (e as Error)?.message ?? "";
       if (/429|rate/i.test(msg)) setErrorState({ kind: "rate", message: "You're sending messages too quickly. Pause for a minute and try again." });
+      else if (/signup_required/i.test(msg)) { setPaywall("auth_required"); setErrorState(null); }
       else if (/402|paywall/i.test(msg)) { setPaywall("paywall"); setErrorState(null); }
       else if (/401|auth_required/i.test(msg)) { setPaywall("auth_required"); setErrorState(null); }
       else if (/ai_not_configured|LOVABLE_API_KEY|AI gateway not configured/i.test(msg)) setErrorState({ kind: "generic", message: "AI is not configured on this host. If you deployed to Vercel, add LOVABLE_API_KEY in Project Settings → Environment Variables and redeploy. On Lovable preview this works automatically." });
