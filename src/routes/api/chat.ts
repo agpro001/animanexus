@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 import { rateLimit, clientIp, rateLimitHeaders } from "@/lib/rate-limit.server";
-import { consumeCredit, getUserFromRequest } from "@/lib/billing.server";
+import { consumeCredit, consumeAnonCredit, getUserFromRequest, getDeviceId } from "@/lib/billing.server";
 
 const SYSTEM = `You are the ANIMA Nexus Assistant — the in-platform AI guardian for **ANIMA Nexus**, an AI-powered animal protection and digital twin ecosystem for pets, shelters, wildlife, and animal emergency response.
 
@@ -87,19 +87,31 @@ export const Route = createFileRoute("/api/chat")({
           }
 
           const user = await getUserFromRequest(request);
-          if (!user) {
-            await logError(401, "auth_required");
-            return new Response(JSON.stringify({ error: "auth_required", requestId }), {
-              status: 401, headers: { "content-type": "application/json", "x-request-id": requestId },
-            });
-          }
-          const consumed = await consumeCredit(user.id);
-          if (!consumed.ok) {
-            await logError(402, "paywall");
-            return new Response(JSON.stringify({ error: "paywall", requestId,
-              paywall: { plans: { single: "$0.50 / use", monthly: "$4 / month unlimited" } } }), {
-              status: 402, headers: { "content-type": "application/json", "x-request-id": requestId },
-            });
+          if (user) {
+            const consumed = await consumeCredit(user.id);
+            if (!consumed.ok) {
+              await logError(402, "paywall");
+              return new Response(JSON.stringify({ error: "paywall", requestId,
+                paywall: { plans: { single: "$0.50 / use", monthly: "$4 / month unlimited" } } }), {
+                status: 402, headers: { "content-type": "application/json", "x-request-id": requestId },
+              });
+            }
+          } else {
+            const deviceId = getDeviceId(request);
+            if (!deviceId) {
+              await logError(400, "device_id_required");
+              return new Response(JSON.stringify({ error: "device_id_required", requestId }), {
+                status: 400, headers: { "content-type": "application/json", "x-request-id": requestId },
+              });
+            }
+            const consumed = await consumeAnonCredit(deviceId);
+            if (!consumed.ok) {
+              await logError(402, "signup_required");
+              return new Response(JSON.stringify({ error: "signup_required", requestId,
+                paywall: { message: "Sign up for 7 free AI uses per day, or pick a plan." } }), {
+                status: 402, headers: { "content-type": "application/json", "x-request-id": requestId },
+              });
+            }
           }
 
           const messages = body.messages;
